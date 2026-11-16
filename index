@@ -417,7 +417,7 @@
           <div>
             <strong>${w.kana}</strong> ${w.kanji ? `<span style="color:var(--primary);">[${w.kanji}]</span>` : ""}
             <span style="color:var(--muted); font-size:0.85rem; margin-left:6px;">${w.zh}</span>
-            <div style="font-size:0.78rem; color:var(--muted); margin-top:2px;">${w.pos} ｜ 狀態：${statusText}</div>
+            <div style="font-size:0.78rem; color:var(--muted); margin-top:2px;">${w.pos}} ｜ 狀態：${statusText}</div>
           </div>
           <button class="audio-btn" onclick="speakJapanese('${w.kana}', 0.9)">🔊</button>
         </div>
