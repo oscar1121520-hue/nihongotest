@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JLPT N5 日文單字熟練度測驗（完整 748 題庫）</title>
+  <style>
+    :root {
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #1e293b;
+      --muted: #64748b;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --border: #e2e8f0;
+    }
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", "Hiragino Sans", "Yu Gothic", sans-serif; }
+    body { background: var(--bg); color: var(--text); margin: 0; padding: 20px; display: flex; justify-content: center; min-height: 100vh; }
+    .container { width: 100%; max-width: 700px; background: var(--card); border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); padding: 28px; align-self: flex-start; }
+    h1 { margin: 0 0 8px; font-size: 1.5rem; text-align: center; }
+    .subtitle { text-align: center; color: var(--muted); font-size: 0.9rem; margin-bottom: 24px; }
+    .stats-bar { display: flex; justify-content: space-around; background: #f1f5f9; padding: 14px; border-radius: 12px; margin-bottom: 24px; font-size: 0.9rem; }
+    .stats-bar div { text-align: center; }
+    .stats-bar strong { display: block; font-size: 1.3rem; color: var(--primary); margin-bottom: 2px; }
+    .mode-grid { display: grid; gap: 12px; margin-bottom: 12px; }
+    .btn { background: var(--primary); color: #fff; border: none; padding: 15px 20px; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: 0.2s; width: 100%; }
+    .btn:hover { background: var(--primary-hover); }
+    .btn-outline { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
+    .btn-outline:hover { background: #eef2ff; }
+    .btn-danger { background: var(--danger); }
+    .btn-danger:hover { background: #b91c1c; }
+    .btn-sm { padding: 8px 14px; font-size: 0.85rem; width: auto; }
+    .hidden { display: none !important; }
+
+    /* 測驗區 */
+    .quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; font-size: 0.9rem; color: var(--muted); gap: 8px; }
+    .badge { padding: 4px 10px; border-radius: 99px; font-size: 0.75rem; font-weight: 600; }
+    .badge-review { background: #fee2e2; color: var(--danger); }
+    .badge-new { background: #e0e7ff; color: var(--primary); }
+    .badge-mastered { background: #dcfce7; color: var(--success); }
+    .question-box { text-align: center; padding: 32px 16px; background: #f8fafc; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--border); }
+    .question-text { font-size: 2rem; font-weight: 700; margin: 0; line-height: 1.4; }
+    .pos-tag { display: inline-block; background: #e2e8f0; color: #475569; font-size: 0.78rem; padding: 2px 8px; border-radius: 6px; margin-top: 8px; }
+    .options-grid { display: grid; gap: 12px; }
+    .option-btn { background: #fff; border: 2px solid var(--border); padding: 14px 18px; border-radius: 10px; font-size: 1.1rem; text-align: left; cursor: pointer; transition: 0.15s; color: var(--text); }
+    .option-btn:hover:not(:disabled) { border-color: var(--primary); background: #f5f3ff; }
+    .option-btn.correct { background: #dcfce7; border-color: var(--success); color: #14532d; font-weight: 600; }
+    .option-btn.wrong { background: #fee2e2; border-color: var(--danger); color: #7f1d1d; }
+    .feedback { margin-top: 16px; padding: 14px; border-radius: 8px; text-align: center; font-weight: 600; line-height: 1.5; }
+
+    /* 錯題本與題庫總覽 */
+    .mistake-list { max-height: 440px; overflow-y: auto; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 16px; }
+    .mistake-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+    .mistake-item:last-child { border-bottom: none; }
+    .audio-btn { background: #e0e7ff; color: var(--primary); border: none; border-radius: 50%; width: 38px; height: 38px; font-size: 1.1rem; cursor: pointer; flex-shrink: 0; }
+    .audio-btn:hover { background: #c7d2fe; }
+    .search-input { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.95rem; margin-bottom: 12px; }
+  </style>
+</head>
+<body>
+<div class="container">
+  <!-- 首頁選單 -->
+  <div id="home-view">
+    <h1>🇯🇵 JLPT N5 單字熟練度測驗</h1>
+    <p class="subtitle">收錄完整 748 個 N5 單字｜每次 20 題（前 5 題錯題複習 + 後 15 題平均新題）</p>
+
+    <div class="stats-bar">
+      <div><strong id="stat-total">748</strong>總題庫數</div>
+      <div><strong id="stat-seen">0</strong>已練習過</div>
+      <div><strong id="stat-mistakes">0</strong>目前錯題</div>
+    </div>
+
+    <div class="mode-grid">
+      <button class="btn" onclick="startQuiz('zh-to-kana')">模式一：看中文 ➔ 選日文平假名</button>
+      <button class="btn" onclick="startQuiz('kanji-to-kana')">模式二：看日文漢字 ➔ 選平假名（共 557 題）</button>
+      <button class="btn" onclick="startQuiz('audio-to-zh')">模式三：聽日文發音 ➔ 選正確中文</button>
+      <button class="btn btn-outline" onclick="openMistakeBook()">📖 查看錯誤記錄本 (<span id="btn-mistake-count">0</span>)</button>
+      <button class="btn btn-outline" style="border-color:#cbd5e1; color:#475569;" onclick="openVocabList()">📚 瀏覽完整單字庫與熟練度</button>
+    </div>
+  </div>
+
+  <!-- 測驗進行畫面 -->
+  <div id="quiz-view" class="hidden">
+    <div class="quiz-header">
+      <button class="btn btn-outline btn-sm" onclick="goHome()">← 返回主選單</button>
+      <span id="q-progress">第 1 / 20 題</span>
+      <span id="q-type-badge" class="badge badge-new">新單字</span>
+    </div>
+
+    <div class="question-box">
+      <p id="q-prompt-label" style="color:var(--muted); font-size:0.85rem; margin:0 0 8px;"></p>
+      <div id="q-content" class="question-text"></div>
+      <div><span id="q-pos-tag" class="pos-tag"></span></div>
+      <div style="margin-top:14px; display:flex; justify-content:center; gap:8px;">
+        <button id="q-audio-btn" class="btn btn-outline btn-sm hidden" onclick="playCurrentAudio(0.9)">🔊 正常語速重聽</button>
+        <button id="q-audio-slow-btn" class="btn btn-outline btn-sm hidden" onclick="playCurrentAudio(0.65)">🐢 慢速重聽</button>
+      </div>
+    </div>
+
+    <div id="options-container" class="options-grid"></div>
+    <div id="feedback-box" class="feedback hidden"></div>
+    <button id="next-btn" class="btn hidden" style="margin-top:16px;" onclick="nextQuestion()">下一題 ➔</button>
+  </div>
+
+  <!-- 測驗結算畫面 -->
+  <div id="result-view" class="hidden" style="text-align:center;">
+    <h2>🎉 測驗完成！</h2>
+    <p style="font-size:1.2rem;">本次得分：<strong id="final-score" style="color:var(--primary); font-size:1.8rem;">0</strong> / 20</p>
+    <p id="result-summary" style="color:var(--muted); margin-bottom:24px;"></p>
+    <div style="display:grid; gap:10px;">
+      <button class="btn" onclick="startQuiz(currentMode)">再測驗一輪（同模式）</button>
+      <button class="btn btn-outline" onclick="goHome()">返回主選單</button>
+    </div>
+  </div>
+
+  <!-- 錯題記錄本畫面 -->
+  <div id="mistake-view" class="hidden">
+    <div class="quiz-header">
+      <button class="btn btn-outline btn-sm" onclick="goHome()">← 返回主選單</button>
+      <strong>錯誤記錄本</strong>
+      <button class="btn btn-danger btn-sm" onclick="clearAllMistakes()">清空錯題</button>
+    </div>
+    <div id="mistake-list-container" class="mistake-list"></div>
+    <div style="text-align:right;">
+      <button class="btn btn-outline btn-sm" style="color:var(--danger); border-color:var(--danger);" onclick="resetAllProgress()">重置所有學習紀錄</button>
+    </div>
+  </div>
+
+  <!-- 完整單字庫檢視畫面 -->
+  <div id="vocab-view" class="hidden">
+    <div class="quiz-header">
+      <button class="btn btn-outline btn-sm" onclick="goHome()">← 返回主選單</button>
+      <strong>完整單字庫（748 單字）</strong>
+      <span></span>
+    </div>
+    <input type="text" id="vocab-search" class="search-input" placeholder="搜尋假名、漢字或中文意思..." oninput="renderVocabList()" />
+    <div id="vocab-list-container" class="mistake-list"></div>
+  </div>
+</div>
+
+<script>
+  // ==========================================
+  // 1. 完整 748 個 JLPT N5 單字題庫
+  // ==========================================
+  const vocabData = [{"id": 1, "kana": "DVD", "kanji": "", "pos": "名詞", "zh": "DVD"}, {"id": 2, "kana": "ああ", "kanji": "", "pos": "感嘆詞", "zh": "啊"}, {"id": 3, "kana": "あいだ", "kanji": "間", "pos": "名詞", "zh": "之間"}, {"id": 4, "kana": "あう", "kanji": "会う", "pos": "動詞", "zh": "見面"}, {"id": 5, "kana": "あおい", "kanji": "青い", "pos": "い形容詞", "zh": "藍色的"}, {"id": 6, "kana": "あか", "kanji": "赤", "pos": "名詞", "zh": "紅色"}, {"id": 7, "kana": "あかい", "kanji": "赤い", "pos": "い形容詞", "zh": "紅色的"}, {"id": 8, "kana": "あかるい", "kanji": "明るい", "pos": "い形容詞", "zh": "明亮的"}, {"id": 9, "kana": "あき", "kanji": "秋", "pos": "名詞", "zh": "秋天"}, {"id": 10, "kana": "あく", "kanji": "開く", "pos": "動詞", "zh": "打開"}, {"id": 11, "kana": "あける", "kanji": "開ける", "pos": "動詞", "zh": "打開"}, {"id": 12, "kana": "あげる", "kanji": "", "pos": "動詞", "zh": "給（他人）"}, {"id": 13, "kana": "あさ", "kanji": "朝", "pos": "名詞", "zh": "早上"}, {"id": 14, "kana": "あさごはん", "kanji": "朝ご飯", "pos": "名詞", "zh": "早餐"}, {"id": 15, "kana": "あさって", "kanji": "", "pos": "名詞", "zh": "後天"}, {"id": 16, "kana": "あし", "kanji": "足", "pos": "名詞", "zh": "腳"}, {"id": 17, "kana": "あした", "kanji": "明日", "pos": "名詞", "zh": "明天"}, {"id": 18, "kana": "あそこ", "kanji": "", "pos": "代名詞", "zh": "那裡（遠）"}, {"id": 19, "kana": "あそぶ", "kanji": "遊ぶ", "pos": "動詞", "zh": "玩"}, {"id": 20, "kana": "あたたかい", "kanji": "暖かい", "pos": "い形容詞", "zh": "溫暖的"}, {"id": 21, "kana": "あたま", "kanji": "頭", "pos": "名詞", "zh": "頭"}, {"id": 22, "kana": "あたらしい", "kanji": "新しい", "pos": "い形容詞", "zh": "新的"}, {"id": 23, "kana": "あちら", "kanji": "", "pos": "代名詞", "zh": "那邊（遠）"}, {"id": 24, "kana": "あつい", "kanji": "暑い", "pos": "い形容詞", "zh": "熱的"}, {"id": 25, "kana": "あつい", "kanji": "熱い", "pos": "い形容詞", "zh": "燙的"}, {"id": 26, "kana": "あつい", "kanji": "厚い", "pos": "い形容詞", "zh": "厚的"}, {"id": 27, "kana": "あっち", "kanji": "", "pos": "代名詞", "zh": "那邊"}, {"id": 28, "kana": "あと", "kanji": "後", "pos": "名詞", "zh": "之後"}, {"id": 29, "kana": "あなた", "kanji": "", "pos": "代名詞", "zh": "你"}, {"id": 30, "kana": "あに", "kanji": "兄", "pos": "名詞", "zh": "哥哥"}, {"id": 31, "kana": "あね", "kanji": "姉", "pos": "名詞", "zh": "姐姐"}, {"id": 32, "kana": "あの", "kanji": "", "pos": "連體詞", "zh": "那個（遠）"}, {"id": 33, "kana": "アパート", "kanji": "", "pos": "名詞", "zh": "公寓"}, {"id": 34, "kana": "あびる", "kanji": "浴びる", "pos": "動詞", "zh": "淋（浴）"}, {"id": 35, "kana": "あぶない", "kanji": "危ない", "pos": "い形容詞", "zh": "危險的"}, {"id": 36, "kana": "アフリカ", "kanji": "", "pos": "名詞", "zh": "非洲"}, {"id": 37, "kana": "あまい", "kanji": "甘い", "pos": "い形容詞", "zh": "甜的"}, {"id": 38, "kana": "あまり", "kanji": "", "pos": "副詞", "zh": "不太"}, {"id": 39, "kana": "あめ", "kanji": "雨", "pos": "名詞", "zh": "雨"}, {"id": 40, "kana": "あめ", "kanji": "飴", "pos": "名詞", "zh": "糖果"}, {"id": 41, "kana": "あらう", "kanji": "洗う", "pos": "動詞", "zh": "洗"}, {"id": 42, "kana": "ある", "kanji": "", "pos": "動詞", "zh": "有（物）"}, {"id": 43, "kana": "あるく", "kanji": "歩く", "pos": "動詞", "zh": "走路"}, {"id": 44, "kana": "あれ", "kanji": "", "pos": "代名詞", "zh": "那個（遠）"}, {"id": 45, "kana": "いい", "kanji": "", "pos": "い形容詞", "zh": "好的"}, {"id": 46, "kana": "いいえ", "kanji": "", "pos": "感嘆詞", "zh": "不是"}, {"id": 47, "kana": "いう", "kanji": "言う", "pos": "動詞", "zh": "說"}, {"id": 48, "kana": "いえ", "kanji": "家", "pos": "名詞", "zh": "家"}, {"id": 49, "kana": "いかが", "kanji": "", "pos": "副詞", "zh": "如何"}, {"id": 50, "kana": "いく", "kanji": "行く", "pos": "動詞", "zh": "去"}, {"id": 51, "kana": "いくつ", "kanji": "", "pos": "疑問詞", "zh": "幾個／幾歲"}, {"id": 52, "kana": "いくら", "kanji": "", "pos": "疑問詞", "zh": "多少錢"}, {"id": 53, "kana": "いけ", "kanji": "池", "pos": "名詞", "zh": "池塘"}, {"id": 54, "kana": "いしゃ", "kanji": "医者", "pos": "名詞", "zh": "醫生"}, {"id": 55, "kana": "いす", "kanji": "椅子", "pos": "名詞", "zh": "椅子"}, {"id": 56, "kana": "いそがしい", "kanji": "忙しい", "pos": "い形容詞", "zh": "忙碌的"}, {"id": 57, "kana": "いそぐ", "kanji": "急ぐ", "pos": "動詞", "zh": "趕快、急忙"}, {"id": 58, "kana": "いたい", "kanji": "痛い", "pos": "い形容詞", "zh": "痛的"}, {"id": 59, "kana": "いただきます", "kanji": "", "pos": "其他", "zh": "開動了"}, {"id": 60, "kana": "いち", "kanji": "一", "pos": "數詞", "zh": "一"}, {"id": 61, "kana": "いちにち", "kanji": "一日", "pos": "名詞", "zh": "一天"}, {"id": 62, "kana": "いちばん", "kanji": "一番", "pos": "副詞", "zh": "最"}, {"id": 63, "kana": "いつ", "kanji": "", "pos": "疑問詞", "zh": "何時"}, {"id": 64, "kana": "いつか", "kanji": "五日", "pos": "名詞", "zh": "五號／五天"}, {"id": 65, "kana": "いっしょ", "kanji": "一緒", "pos": "名詞", "zh": "一起"}, {"id": 66, "kana": "いつつ", "kanji": "五つ", "pos": "數詞", "zh": "五個"}, {"id": 67, "kana": "いっぱい", "kanji": "", "pos": "副詞", "zh": "滿、很多"}, {"id": 68, "kana": "いつも", "kanji": "", "pos": "副詞", "zh": "總是"}, {"id": 69, "kana": "いぬ", "kanji": "犬", "pos": "名詞", "zh": "狗"}, {"id": 70, "kana": "いま", "kanji": "今", "pos": "名詞", "zh": "現在"}, {"id": 71, "kana": "いみ", "kanji": "意味", "pos": "名詞", "zh": "意思"}, {"id": 72, "kana": "いもうと", "kanji": "妹", "pos": "名詞", "zh": "妹妹"}, {"id": 73, "kana": "いや", "kanji": "嫌", "pos": "な形容詞", "zh": "討厭"}, {"id": 74, "kana": "いりぐち", "kanji": "入口", "pos": "名詞", "zh": "入口"}, {"id": 75, "kana": "いる", "kanji": "", "pos": "動詞", "zh": "在（人／動物）"}, {"id": 76, "kana": "いる", "kanji": "要る", "pos": "動詞", "zh": "需要"}, {"id": 77, "kana": "いれる", "kanji": "入れる", "pos": "動詞", "zh": "放入"}, {"id": 78, "kana": "いろ", "kanji": "色", "pos": "名詞", "zh": "顏色"}, {"id": 79, "kana": "いろいろ", "kanji": "", "pos": "な形容詞", "zh": "各式各樣"}, {"id": 80, "kana": "うえ", "kanji": "上", "pos": "名詞", "zh": "上面"}, {"id": 81, "kana": "うしろ", "kanji": "後ろ", "pos": "名詞", "zh": "後面"}, {"id": 82, "kana": "うすい", "kanji": "薄い", "pos": "い形容詞", "zh": "薄的"}, {"id": 83, "kana": "うた", "kanji": "歌", "pos": "名詞", "zh": "歌"}, {"id": 84, "kana": "うたう", "kanji": "歌う", "pos": "動詞", "zh": "唱歌"}, {"id": 85, "kana": "うち", "kanji": "", "pos": "名詞", "zh": "家"}, {"id": 86, "kana": "うまれる", "kanji": "生まれる", "pos": "動詞", "zh": "出生"}, {"id": 87, "kana": "うみ", "kanji": "海", "pos": "名詞", "zh": "海"}, {"id": 88, "kana": "うる", "kanji": "売る", "pos": "動詞", "zh": "賣"}, {"id": 89, "kana": "うるさい", "kanji": "", "pos": "い形容詞", "zh": "吵鬧的"}, {"id": 90, "kana": "うわぎ", "kanji": "上着", "pos": "名詞", "zh": "外套"}, {"id": 91, "kana": "え", "kanji": "絵", "pos": "名詞", "zh": "畫"}, {"id": 92, "kana": "エアコン", "kanji": "", "pos": "名詞", "zh": "冷氣、空調"}, {"id": 93, "kana": "えいが", "kanji": "映画", "pos": "名詞", "zh": "電影"}, {"id": 94, "kana": "えいがかん", "kanji": "映画館", "pos": "名詞", "zh": "電影院"}, {"id": 95, "kana": "えいご", "kanji": "英語", "pos": "名詞", "zh": "英語"}, {"id": 96, "kana": "ええ", "kanji": "", "pos": "感嘆詞", "zh": "是（禮貌）"}, {"id": 97, "kana": "えき", "kanji": "駅", "pos": "名詞", "zh": "車站"}, {"id": 98, "kana": "えきまえ", "kanji": "駅前", "pos": "名詞", "zh": "車站前"}, {"id": 99, "kana": "エレベーター", "kanji": "", "pos": "名詞", "zh": "電梯"}, {"id": 100, "kana": "えん", "kanji": "円", "pos": "名詞", "zh": "日圓"}, {"id": 101, "kana": "えんぴつ", "kanji": "鉛筆", "pos": "名詞", "zh": "鉛筆"}, {"id": 102, "kana": "おいしい", "kanji": "", "pos": "い形容詞", "zh": "好吃的"}, {"id": 103, "kana": "おおい", "kanji": "多い", "pos": "い形容詞", "zh": "多的"}, {"id": 104, "kana": "おおきい", "kanji": "大きい", "pos": "い形容詞", "zh": "大的"}, {"id": 105, "kana": "おおぜい", "kanji": "大勢", "pos": "名詞", "zh": "很多人"}, {"id": 106, "kana": "おかあさんお", "kanji": "母さん", "pos": "名詞", "zh": "母親"}, {"id": 107, "kana": "おかしお", "kanji": "菓子", "pos": "名詞", "zh": "點心"}, {"id": 108, "kana": "おかねお", "kanji": "金", "pos": "名詞", "zh": "錢"}, {"id": 109, "kana": "おきる", "kanji": "起きる", "pos": "動詞", "zh": "起床"}, {"id": 110, "kana": "おく", "kanji": "置く", "pos": "動詞", "zh": "放置"}, {"id": 111, "kana": "おくさん", "kanji": "奥さん", "pos": "名詞", "zh": "夫人"}, {"id": 112, "kana": "おくにお", "kanji": "国", "pos": "名詞", "zh": "貴國、您的故鄉"}, {"id": 113, "kana": "おさけお", "kanji": "酒", "pos": "名詞", "zh": "酒"}, {"id": 114, "kana": "おさらお", "kanji": "皿", "pos": "名詞", "zh": "盤子"}, {"id": 115, "kana": "おじいさん", "kanji": "", "pos": "名詞", "zh": "爺爺"}, {"id": 116, "kana": "おしえる", "kanji": "教える", "pos": "動詞", "zh": "教"}, {"id": 117, "kana": "おじさん", "kanji": "", "pos": "名詞", "zh": "伯伯／叔叔"}, {"id": 118, "kana": "おす", "kanji": "押す", "pos": "動詞", "zh": "按、推"}, {"id": 119, "kana": "おそい", "kanji": "遅い", "pos": "い形容詞", "zh": "慢的、晚的"}, {"id": 120, "kana": "おちゃお", "kanji": "茶", "pos": "名詞", "zh": "茶"}, {"id": 121, "kana": "おてあらいお", "kanji": "手洗い", "pos": "名詞", "zh": "洗手間"}, {"id": 122, "kana": "おとうさんお", "kanji": "父さん", "pos": "名詞", "zh": "父親"}, {"id": 123, "kana": "おとうと", "kanji": "弟", "pos": "名詞", "zh": "弟弟"}, {"id": 124, "kana": "おとこ", "kanji": "男", "pos": "名詞", "zh": "男"}, {"id": 125, "kana": "おとこのこ", "kanji": "男の子", "pos": "名詞", "zh": "男孩"}, {"id": 126, "kana": "おととい", "kanji": "", "pos": "名詞", "zh": "前天"}, {"id": 127, "kana": "おととし", "kanji": "一昨年", "pos": "名詞", "zh": "前年"}, {"id": 128, "kana": "おとな", "kanji": "大人", "pos": "名詞", "zh": "大人"}, {"id": 129, "kana": "おなか", "kanji": "", "pos": "名詞", "zh": "肚子"}, {"id": 130, "kana": "おなじ", "kanji": "同じ", "pos": "な形容詞", "zh": "一樣"}, {"id": 131, "kana": "おにいさんお", "kanji": "兄さん", "pos": "名詞", "zh": "哥哥"}, {"id": 132, "kana": "おにぎり", "kanji": "", "pos": "名詞", "zh": "飯糰"}, {"id": 133, "kana": "おねえさんお", "kanji": "姉さん", "pos": "名詞", "zh": "姐姐"}, {"id": 134, "kana": "おねがいするお", "kanji": "願いする", "pos": "動詞", "zh": "拜託、請求"}, {"id": 135, "kana": "おばあさん", "kanji": "", "pos": "名詞", "zh": "奶奶"}, {"id": 136, "kana": "おばさん", "kanji": "", "pos": "名詞", "zh": "阿姨／伯母"}, {"id": 137, "kana": "おひるお", "kanji": "昼", "pos": "名詞", "zh": "中午、午餐"}, {"id": 138, "kana": "おふろお", "kanji": "風呂", "pos": "名詞", "zh": "浴室"}, {"id": 139, "kana": "おべんとうお", "kanji": "弁当", "pos": "名詞", "zh": "便當"}, {"id": 140, "kana": "おぼえる", "kanji": "覚える", "pos": "動詞", "zh": "記住"}, {"id": 141, "kana": "おまわりさん", "kanji": "", "pos": "名詞", "zh": "警察"}, {"id": 142, "kana": "おもい", "kanji": "重い", "pos": "い形容詞", "zh": "重的"}, {"id": 143, "kana": "おもしろい", "kanji": "面白い", "pos": "い形容詞", "zh": "有趣的"}, {"id": 144, "kana": "およぐ", "kanji": "泳ぐ", "pos": "動詞", "zh": "游泳"}, {"id": 145, "kana": "おりる", "kanji": "降りる", "pos": "動詞", "zh": "下（車）"}, {"id": 146, "kana": "おわる", "kanji": "終わる", "pos": "動詞", "zh": "結束"}, {"id": 147, "kana": "おんがく", "kanji": "音楽", "pos": "名詞", "zh": "音樂"}, {"id": 148, "kana": "おんな", "kanji": "女", "pos": "名詞", "zh": "女"}, {"id": 149, "kana": "おんなのこ", "kanji": "女の子", "pos": "名詞", "zh": "女孩"}, {"id": 150, "kana": "かい", "kanji": "階", "pos": "數詞", "zh": "樓層"}, {"id": 151, "kana": "かい", "kanji": "回", "pos": "數詞", "zh": "次（次數）"}, {"id": 152, "kana": "がいこく", "kanji": "外国", "pos": "名詞", "zh": "外國"}, {"id": 153, "kana": "がいこくじん", "kanji": "外国人", "pos": "名詞", "zh": "外國人"}, {"id": 154, "kana": "かいしゃ", "kanji": "会社", "pos": "名詞", "zh": "公司"}, {"id": 155, "kana": "かいだん", "kanji": "階段", "pos": "名詞", "zh": "樓梯"}, {"id": 156, "kana": "かいもの", "kanji": "買い物", "pos": "名詞", "zh": "購物"}, {"id": 157, "kana": "かう", "kanji": "買う", "pos": "動詞", "zh": "買"}, {"id": 158, "kana": "かえす", "kanji": "返す", "pos": "動詞", "zh": "歸還"}, {"id": 159, "kana": "かえる", "kanji": "帰る", "pos": "動詞", "zh": "回去"}, {"id": 160, "kana": "かお", "kanji": "顔", "pos": "名詞", "zh": "臉"}, {"id": 161, "kana": "かかる", "kanji": "", "pos": "動詞", "zh": "花費"}, {"id": 162, "kana": "かぎ", "kanji": "", "pos": "名詞", "zh": "鑰匙"}, {"id": 163, "kana": "かく", "kanji": "書く", "pos": "動詞", "zh": "寫"}, {"id": 164, "kana": "がくせい", "kanji": "学生", "pos": "名詞", "zh": "學生"}, {"id": 165, "kana": "かげつか", "kanji": "月", "pos": "數詞", "zh": "個月（量詞）"}, {"id": 166, "kana": "かける", "kanji": "", "pos": "動詞", "zh": "打（電話）"}, {"id": 167, "kana": "かさ", "kanji": "傘", "pos": "名詞", "zh": "雨傘"}, {"id": 168, "kana": "かす", "kanji": "貸す", "pos": "動詞", "zh": "借出"}, {"id": 169, "kana": "かぜ", "kanji": "風", "pos": "名詞", "zh": "風"}, {"id": 170, "kana": "かぜ", "kanji": "風邪", "pos": "名詞", "zh": "感冒"}, {"id": 171, "kana": "かぞく", "kanji": "家族", "pos": "名詞", "zh": "家人"}, {"id": 172, "kana": "かた", "kanji": "方", "pos": "名詞", "zh": "位（敬稱）"}, {"id": 173, "kana": "かたかな", "kanji": "片仮名", "pos": "名詞", "zh": "片假名"}, {"id": 174, "kana": "がっこう", "kanji": "学校", "pos": "名詞", "zh": "學校"}, {"id": 175, "kana": "カップ", "kanji": "", "pos": "名詞", "zh": "杯子"}, {"id": 176, "kana": "かてい", "kanji": "家庭", "pos": "名詞", "zh": "家庭"}, {"id": 177, "kana": "かど", "kanji": "角", "pos": "名詞", "zh": "轉角"}, {"id": 178, "kana": "かばん", "kanji": "", "pos": "名詞", "zh": "包包"}, {"id": 179, "kana": "かびん", "kanji": "花瓶", "pos": "名詞", "zh": "花瓶"}, {"id": 180, "kana": "かぶる", "kanji": "", "pos": "動詞", "zh": "戴（帽）"}, {"id": 181, "kana": "かみ", "kanji": "紙", "pos": "名詞", "zh": "紙"}, {"id": 182, "kana": "カメラ", "kanji": "", "pos": "名詞", "zh": "相機"}, {"id": 183, "kana": "かようび", "kanji": "火曜日", "pos": "名詞", "zh": "星期二"}, {"id": 184, "kana": "からい", "kanji": "辛い", "pos": "い形容詞", "zh": "辣的"}, {"id": 185, "kana": "からだ", "kanji": "体", "pos": "名詞", "zh": "身體"}, {"id": 186, "kana": "かりる", "kanji": "借りる", "pos": "動詞", "zh": "借入"}, {"id": 187, "kana": "かるい", "kanji": "軽い", "pos": "い形容詞", "zh": "輕的"}, {"id": 188, "kana": "カレー", "kanji": "", "pos": "名詞", "zh": "咖哩"}, {"id": 189, "kana": "カレーや", "kanji": "カレー屋", "pos": "名詞", "zh": "咖哩店"}, {"id": 190, "kana": "カレンダー", "kanji": "", "pos": "名詞", "zh": "月曆"}, {"id": 191, "kana": "かわ", "kanji": "川", "pos": "名詞", "zh": "河"}, {"id": 192, "kana": "かわいい", "kanji": "", "pos": "い形容詞", "zh": "可愛的"}, {"id": 193, "kana": "かんじ", "kanji": "漢字", "pos": "名詞", "zh": "漢字"}, {"id": 194, "kana": "かんたん", "kanji": "簡単", "pos": "な形容詞", "zh": "簡單"}, {"id": 195, "kana": "き", "kanji": "木", "pos": "名詞", "zh": "樹"}, {"id": 196, "kana": "きいろい", "kanji": "黄色い", "pos": "い形容詞", "zh": "黃色的"}, {"id": 197, "kana": "きえる", "kanji": "消える", "pos": "動詞", "zh": "消失"}, {"id": 198, "kana": "きく", "kanji": "聞く", "pos": "動詞", "zh": "聽、問"}, {"id": 199, "kana": "きた", "kanji": "北", "pos": "名詞", "zh": "北"}, {"id": 200, "kana": "ギター", "kanji": "", "pos": "名詞", "zh": "吉他"}, {"id": 201, "kana": "きたがわ", "kanji": "北がわ", "pos": "名詞", "zh": "北邊"}, {"id": 202, "kana": "きたない", "kanji": "汚い", "pos": "い形容詞", "zh": "髒的"}, {"id": 203, "kana": "きっさてん", "kanji": "喫茶店", "pos": "名詞", "zh": "咖啡店"}, {"id": 204, "kana": "きって", "kanji": "切手", "pos": "名詞", "zh": "郵票"}, {"id": 205, "kana": "きっぷ", "kanji": "切符", "pos": "名詞", "zh": "票"}, {"id": 206, "kana": "きのう", "kanji": "昨日", "pos": "名詞", "zh": "昨天"}, {"id": 207, "kana": "きゅう", "kanji": "九", "pos": "數詞", "zh": "九"}, {"id": 208, "kana": "ぎゅうにく", "kanji": "牛肉", "pos": "名詞", "zh": "牛肉"}, {"id": 209, "kana": "ぎゅうにゅう", "kanji": "牛乳", "pos": "名詞", "zh": "牛奶"}, {"id": 210, "kana": "きょう", "kanji": "今日", "pos": "名詞", "zh": "今天"}, {"id": 211, "kana": "きょうしつ", "kanji": "教室", "pos": "名詞", "zh": "教室"}, {"id": 212, "kana": "きょうだい", "kanji": "兄弟", "pos": "名詞", "zh": "兄弟姊妹"}, {"id": 213, "kana": "きょうと", "kanji": "京都", "pos": "名詞", "zh": "京都"}, {"id": 214, "kana": "きょねん", "kanji": "去年", "pos": "名詞", "zh": "去年"}, {"id": 215, "kana": "きらい", "kanji": "嫌い", "pos": "な形容詞", "zh": "討厭"}, {"id": 216, "kana": "きる", "kanji": "切る", "pos": "動詞", "zh": "切"}, {"id": 217, "kana": "きる", "kanji": "着る", "pos": "動詞", "zh": "穿（衣）"}, {"id": 218, "kana": "きれい", "kanji": "", "pos": "な形容詞", "zh": "漂亮、乾淨"}, {"id": 219, "kana": "キロ", "kanji": "", "pos": "名詞", "zh": "公斤／公里"}, {"id": 220, "kana": "キロメートル", "kanji": "", "pos": "名詞", "zh": "公里"}, {"id": 221, "kana": "ぎんこう", "kanji": "銀行", "pos": "名詞", "zh": "銀行"}, {"id": 222, "kana": "きんようび", "kanji": "金曜日", "pos": "名詞", "zh": "星期五"}, {"id": 223, "kana": "くすり", "kanji": "薬", "pos": "名詞", "zh": "藥"}, {"id": 224, "kana": "ください", "kanji": "", "pos": "其他", "zh": "請給我"}, {"id": 225, "kana": "くだもの", "kanji": "果物", "pos": "名詞", "zh": "水果"}, {"id": 226, "kana": "くち", "kanji": "口", "pos": "名詞", "zh": "嘴"}, {"id": 227, "kana": "くつ", "kanji": "靴", "pos": "名詞", "zh": "鞋子"}, {"id": 228, "kana": "クッキー", "kanji": "", "pos": "名詞", "zh": "餅乾"}, {"id": 229, "kana": "くつした", "kanji": "靴下", "pos": "名詞", "zh": "襪子"}, {"id": 230, "kana": "くに", "kanji": "国", "pos": "名詞", "zh": "國家"}, {"id": 231, "kana": "くもり", "kanji": "曇り", "pos": "名詞", "zh": "陰天"}, {"id": 232, "kana": "くらい", "kanji": "暗い", "pos": "い形容詞", "zh": "暗的"}, {"id": 233, "kana": "クラス", "kanji": "", "pos": "名詞", "zh": "班級"}, {"id": 234, "kana": "グラム", "kanji": "", "pos": "名詞", "zh": "公克"}, {"id": 235, "kana": "くる", "kanji": "来る", "pos": "動詞", "zh": "來"}, {"id": 236, "kana": "くるま", "kanji": "車", "pos": "名詞", "zh": "車子"}, {"id": 237, "kana": "くろ", "kanji": "黒", "pos": "名詞", "zh": "黑色"}, {"id": 238, "kana": "くろい", "kanji": "黒い", "pos": "い形容詞", "zh": "黑色的"}, {"id": 239, "kana": "けいかん", "kanji": "警官", "pos": "名詞", "zh": "警察"}, {"id": 240, "kana": "ケーキ", "kanji": "", "pos": "名詞", "zh": "蛋糕"}, {"id": 241, "kana": "けさ", "kanji": "今朝", "pos": "名詞", "zh": "今天早上"}, {"id": 242, "kana": "けしゴム", "kanji": "消しゴム", "pos": "名詞", "zh": "橡皮擦"}, {"id": 243, "kana": "けす", "kanji": "消す", "pos": "動詞", "zh": "關掉、擦掉"}, {"id": 244, "kana": "けっこう", "kanji": "結構", "pos": "な形容詞", "zh": "不用了、很好"}, {"id": 245, "kana": "けっこん", "kanji": "結婚", "pos": "名詞", "zh": "結婚"}, {"id": 246, "kana": "けっこんする", "kanji": "結婚する", "pos": "動詞", "zh": "結婚"}, {"id": 247, "kana": "げつようび", "kanji": "月曜日", "pos": "名詞", "zh": "星期一"}, {"id": 248, "kana": "げんかん", "kanji": "玄関", "pos": "名詞", "zh": "玄關"}, {"id": 249, "kana": "げんき", "kanji": "元気", "pos": "な形容詞", "zh": "精神、健康"}, {"id": 250, "kana": "こ", "kanji": "個", "pos": "數詞", "zh": "個（量詞）"}, {"id": 251, "kana": "ご", "kanji": "五", "pos": "數詞", "zh": "五"}, {"id": 252, "kana": "こうえん", "kanji": "公園", "pos": "名詞", "zh": "公園"}, {"id": 253, "kana": "こうさてん", "kanji": "交差点", "pos": "名詞", "zh": "十字路口"}, {"id": 254, "kana": "こうちゃ", "kanji": "紅茶", "pos": "名詞", "zh": "紅茶"}, {"id": 255, "kana": "こうばん", "kanji": "交番", "pos": "名詞", "zh": "派出所"}, {"id": 256, "kana": "こえ", "kanji": "声", "pos": "名詞", "zh": "聲音"}, {"id": 257, "kana": "コート", "kanji": "", "pos": "名詞", "zh": "大衣"}, {"id": 258, "kana": "コーヒー", "kanji": "", "pos": "名詞", "zh": "咖啡"}, {"id": 259, "kana": "ここ", "kanji": "", "pos": "代名詞", "zh": "這裡"}, {"id": 260, "kana": "ごご", "kanji": "午後", "pos": "名詞", "zh": "下午"}, {"id": 261, "kana": "ここのか", "kanji": "九日", "pos": "名詞", "zh": "九號／九天"}, {"id": 262, "kana": "ここのつ", "kanji": "九つ", "pos": "數詞", "zh": "九個"}, {"id": 263, "kana": "ごぜん", "kanji": "午前", "pos": "名詞", "zh": "上午"}, {"id": 264, "kana": "こたえる", "kanji": "答える", "pos": "動詞", "zh": "回答"}, {"id": 265, "kana": "こちら", "kanji": "", "pos": "代名詞", "zh": "這邊"}, {"id": 266, "kana": "こっち", "kanji": "", "pos": "代名詞", "zh": "這邊"}, {"id": 267, "kana": "コップ", "kanji": "", "pos": "名詞", "zh": "杯子"}, {"id": 268, "kana": "ことし", "kanji": "今年", "pos": "名詞", "zh": "今年"}, {"id": 269, "kana": "ことば", "kanji": "言葉", "pos": "名詞", "zh": "語言、話"}, {"id": 270, "kana": "こども", "kanji": "子供", "pos": "名詞", "zh": "小孩"}, {"id": 271, "kana": "この", "kanji": "", "pos": "連體詞", "zh": "這個"}, {"id": 272, "kana": "ごはんご", "kanji": "飯", "pos": "名詞", "zh": "飯"}, {"id": 273, "kana": "コピー", "kanji": "", "pos": "名詞", "zh": "影印"}, {"id": 274, "kana": "こまる", "kanji": "困る", "pos": "動詞", "zh": "困擾"}, {"id": 275, "kana": "これ", "kanji": "", "pos": "代名詞", "zh": "這個"}, {"id": 276, "kana": "こんげつ", "kanji": "今月", "pos": "名詞", "zh": "這個月"}, {"id": 277, "kana": "こんしゅう", "kanji": "今週", "pos": "名詞", "zh": "這週"}, {"id": 278, "kana": "こんな", "kanji": "", "pos": "連體詞", "zh": "這樣的"}, {"id": 279, "kana": "こんにちは", "kanji": "", "pos": "感嘆詞", "zh": "你好"}, {"id": 280, "kana": "こんばん", "kanji": "今晩", "pos": "名詞", "zh": "今晚"}, {"id": 281, "kana": "こんばんは", "kanji": "", "pos": "感嘆詞", "zh": "晚安（問候）"}, {"id": 282, "kana": "さあ", "kanji": "", "pos": "感嘆詞", "zh": "來吧"}, {"id": 283, "kana": "さいご", "kanji": "最後", "pos": "名詞", "zh": "最後"}, {"id": 284, "kana": "さいふ", "kanji": "財布", "pos": "名詞", "zh": "錢包"}, {"id": 285, "kana": "さかな", "kanji": "魚", "pos": "名詞", "zh": "魚"}, {"id": 286, "kana": "さき", "kanji": "先", "pos": "名詞", "zh": "先、前面"}, {"id": 287, "kana": "さく", "kanji": "咲く", "pos": "動詞", "zh": "開（花）"}, {"id": 288, "kana": "さくぶん", "kanji": "作文", "pos": "名詞", "zh": "作文"}, {"id": 289, "kana": "さす", "kanji": "差す", "pos": "動詞", "zh": "撐（傘）"}, {"id": 290, "kana": "サッカー", "kanji": "", "pos": "名詞", "zh": "足球"}, {"id": 291, "kana": "ざっし", "kanji": "雑誌", "pos": "名詞", "zh": "雜誌"}, {"id": 292, "kana": "さとう", "kanji": "砂糖", "pos": "名詞", "zh": "砂糖"}, {"id": 293, "kana": "さむい", "kanji": "寒い", "pos": "い形容詞", "zh": "寒冷的"}, {"id": 294, "kana": "さらいねん", "kanji": "再来年", "pos": "名詞", "zh": "後年"}, {"id": 295, "kana": "さん", "kanji": "三", "pos": "數詞", "zh": "三"}, {"id": 296, "kana": "さんにん", "kanji": "三人", "pos": "數詞", "zh": "三個人"}, {"id": 297, "kana": "さんぽ", "kanji": "散歩", "pos": "名詞", "zh": "散步"}, {"id": 298, "kana": "さんぼん", "kanji": "三本", "pos": "數詞", "zh": "三支、三瓶（細長物）"}, {"id": 299, "kana": "し", "kanji": "四", "pos": "數詞", "zh": "四"}, {"id": 300, "kana": "じ", "kanji": "字", "pos": "名詞", "zh": "字"}, {"id": 301, "kana": "しお", "kanji": "塩", "pos": "名詞", "zh": "鹽"}, {"id": 302, "kana": "しかし", "kanji": "", "pos": "接續詞", "zh": "但是"}, {"id": 303, "kana": "じかん", "kanji": "時間", "pos": "名詞", "zh": "時間"}, {"id": 304, "kana": "しごと", "kanji": "仕事", "pos": "名詞", "zh": "工作"}, {"id": 305, "kana": "じしょ", "kanji": "辞書", "pos": "名詞", "zh": "字典"}, {"id": 306, "kana": "しずか", "kanji": "静か", "pos": "な形容詞", "zh": "安靜"}, {"id": 307, "kana": "した", "kanji": "下", "pos": "名詞", "zh": "下面"}, {"id": 308, "kana": "しち", "kanji": "七", "pos": "數詞", "zh": "七"}, {"id": 309, "kana": "しちがつ", "kanji": "7月", "pos": "名詞", "zh": "七月"}, {"id": 310, "kana": "しつもん", "kanji": "質問", "pos": "名詞", "zh": "問題、提問"}, {"id": 311, "kana": "しつれい", "kanji": "失礼", "pos": "名詞", "zh": "失禮、告辭"}, {"id": 312, "kana": "じてんしゃ", "kanji": "自転車", "pos": "名詞", "zh": "腳踏車"}, {"id": 313, "kana": "じどうしゃ", "kanji": "自動車", "pos": "名詞", "zh": "汽車"}, {"id": 314, "kana": "しぬ", "kanji": "死ぬ", "pos": "動詞", "zh": "死"}, {"id": 315, "kana": "じびき", "kanji": "字引", "pos": "名詞", "zh": "字典"}, {"id": 316, "kana": "じぶん", "kanji": "自分", "pos": "名詞", "zh": "自己"}, {"id": 317, "kana": "しまる", "kanji": "閉まる", "pos": "動詞", "zh": "關上"}, {"id": 318, "kana": "しめる", "kanji": "閉める", "pos": "動詞", "zh": "關（門窗）"}, {"id": 319, "kana": "しめる", "kanji": "締める", "pos": "動詞", "zh": "繫（領帶）"}, {"id": 320, "kana": "じゃ", "kanji": "", "pos": "接續詞", "zh": "那麼"}, {"id": 321, "kana": "しゃしん", "kanji": "写真", "pos": "名詞", "zh": "照片"}, {"id": 322, "kana": "シャツ", "kanji": "", "pos": "名詞", "zh": "襯衫"}, {"id": 323, "kana": "シャワー", "kanji": "", "pos": "名詞", "zh": "淋浴"}, {"id": 324, "kana": "じゅう", "kanji": "十", "pos": "數詞", "zh": "十"}, {"id": 325, "kana": "しゅうかん", "kanji": "週間", "pos": "數詞", "zh": "週、星期（量詞）"}, {"id": 326, "kana": "じゅぎょう", "kanji": "授業", "pos": "名詞", "zh": "課"}, {"id": 327, "kana": "しゅくだい", "kanji": "宿題", "pos": "名詞", "zh": "作業"}, {"id": 328, "kana": "じょうず", "kanji": "上手", "pos": "な形容詞", "zh": "擅長"}, {"id": 329, "kana": "じょうぶ", "kanji": "丈夫", "pos": "な形容詞", "zh": "堅固、健康"}, {"id": 330, "kana": "しょうゆ", "kanji": "醤油", "pos": "名詞", "zh": "醬油"}, {"id": 331, "kana": "しょくどう", "kanji": "食堂", "pos": "名詞", "zh": "食堂"}, {"id": 332, "kana": "しる", "kanji": "知る", "pos": "動詞", "zh": "知道"}, {"id": 333, "kana": "しろい", "kanji": "白い", "pos": "い形容詞", "zh": "白色的"}, {"id": 334, "kana": "しんぶん", "kanji": "新聞", "pos": "名詞", "zh": "報紙"}, {"id": 335, "kana": "すいようび", "kanji": "水曜日", "pos": "名詞", "zh": "星期三"}, {"id": 336, "kana": "すう", "kanji": "吸う", "pos": "動詞", "zh": "吸（菸）"}, {"id": 337, "kana": "スカート", "kanji": "", "pos": "名詞", "zh": "裙子"}, {"id": 338, "kana": "すき", "kanji": "好き", "pos": "な形容詞", "zh": "喜歡"}, {"id": 339, "kana": "すぐ", "kanji": "", "pos": "副詞", "zh": "馬上"}, {"id": 340, "kana": "すくない", "kanji": "少ない", "pos": "い形容詞", "zh": "少的"}, {"id": 341, "kana": "すこし", "kanji": "少し", "pos": "副詞", "zh": "一點"}, {"id": 342, "kana": "すし", "kanji": "", "pos": "名詞", "zh": "壽司"}, {"id": 343, "kana": "すしや", "kanji": "すし屋", "pos": "名詞", "zh": "壽司店"}, {"id": 344, "kana": "すずしい", "kanji": "涼しい", "pos": "い形容詞", "zh": "涼爽的"}, {"id": 345, "kana": "ストーブ", "kanji": "", "pos": "名詞", "zh": "暖爐"}, {"id": 346, "kana": "スパゲティ", "kanji": "", "pos": "名詞", "zh": "義大利麵"}, {"id": 347, "kana": "スプーン", "kanji": "", "pos": "名詞", "zh": "湯匙"}, {"id": 348, "kana": "スポーツ", "kanji": "", "pos": "名詞", "zh": "運動"}, {"id": 349, "kana": "ズボン", "kanji": "", "pos": "名詞", "zh": "長褲"}, {"id": 350, "kana": "すむ", "kanji": "住む", "pos": "動詞", "zh": "居住"}, {"id": 351, "kana": "スリッパ", "kanji": "", "pos": "名詞", "zh": "拖鞋"}, {"id": 352, "kana": "する", "kanji": "", "pos": "動詞", "zh": "做"}, {"id": 353, "kana": "すわる", "kanji": "座る", "pos": "動詞", "zh": "坐"}, {"id": 354, "kana": "せ", "kanji": "背", "pos": "名詞", "zh": "身高、背"}, {"id": 355, "kana": "せいと", "kanji": "生徒", "pos": "名詞", "zh": "學生"}, {"id": 356, "kana": "セーター", "kanji": "", "pos": "名詞", "zh": "毛衣"}, {"id": 357, "kana": "せっけん", "kanji": "石鹸", "pos": "名詞", "zh": "肥皂"}, {"id": 358, "kana": "せびろ", "kanji": "背広", "pos": "名詞", "zh": "西裝"}, {"id": 359, "kana": "せまい", "kanji": "狭い", "pos": "い形容詞", "zh": "窄的"}, {"id": 360, "kana": "ゼロ", "kanji": "", "pos": "數詞", "zh": "零"}, {"id": 361, "kana": "せん", "kanji": "千", "pos": "數詞", "zh": "千"}, {"id": 362, "kana": "せんげつ", "kanji": "先月", "pos": "名詞", "zh": "上個月"}, {"id": 363, "kana": "せんしゅう", "kanji": "先週", "pos": "名詞", "zh": "上週"}, {"id": 364, "kana": "せんせい", "kanji": "先生", "pos": "名詞", "zh": "老師"}, {"id": 365, "kana": "せんたく", "kanji": "洗濯", "pos": "名詞", "zh": "洗衣服"}, {"id": 366, "kana": "せんたくする", "kanji": "洗濯する", "pos": "動詞", "zh": "洗衣服"}, {"id": 367, "kana": "ぜんぶ", "kanji": "全部", "pos": "名詞", "zh": "全部"}, {"id": 368, "kana": "そう", "kanji": "", "pos": "副詞", "zh": "是那樣"}, {"id": 369, "kana": "そうじ", "kanji": "掃除", "pos": "名詞", "zh": "打掃"}, {"id": 370, "kana": "そうじする", "kanji": "掃除する", "pos": "動詞", "zh": "打掃"}, {"id": 371, "kana": "そうして", "kanji": "", "pos": "接續詞", "zh": "然後"}, {"id": 372, "kana": "そこ", "kanji": "", "pos": "代名詞", "zh": "那裡"}, {"id": 373, "kana": "そちら", "kanji": "", "pos": "代名詞", "zh": "那邊"}, {"id": 374, "kana": "そっち", "kanji": "", "pos": "代名詞", "zh": "那邊"}, {"id": 375, "kana": "そと", "kanji": "外", "pos": "名詞", "zh": "外面"}, {"id": 376, "kana": "その", "kanji": "", "pos": "連體詞", "zh": "那個"}, {"id": 377, "kana": "そば", "kanji": "", "pos": "名詞", "zh": "旁邊、蕎麥麵"}, {"id": 378, "kana": "そばや", "kanji": "そば屋", "pos": "名詞", "zh": "蕎麥麵店"}, {"id": 379, "kana": "そふ", "kanji": "祖父", "pos": "名詞", "zh": "（自己的）祖父、爺爺"}, {"id": 380, "kana": "そぼ", "kanji": "祖母", "pos": "名詞", "zh": "（自己的）祖母、奶奶"}, {"id": 381, "kana": "そら", "kanji": "空", "pos": "名詞", "zh": "天空"}, {"id": 382, "kana": "それ", "kanji": "", "pos": "代名詞", "zh": "那個"}, {"id": 383, "kana": "それから", "kanji": "", "pos": "接續詞", "zh": "然後、還有"}, {"id": 384, "kana": "それでは", "kanji": "", "pos": "接續詞", "zh": "那麼"}, {"id": 385, "kana": "たいしかん", "kanji": "大使館", "pos": "名詞", "zh": "大使館"}, {"id": 386, "kana": "たいせつ", "kanji": "大切", "pos": "な形容詞", "zh": "重要"}, {"id": 387, "kana": "たいてい", "kanji": "", "pos": "副詞", "zh": "大致；通常"}, {"id": 388, "kana": "だいどころ", "kanji": "台所", "pos": "名詞", "zh": "廚房"}, {"id": 389, "kana": "たいへん", "kanji": "大変", "pos": "副詞", "zh": "非常；糟糕"}, {"id": 390, "kana": "たかい", "kanji": "高い", "pos": "い形容詞", "zh": "高；貴"}, {"id": 391, "kana": "たくさん", "kanji": "", "pos": "副詞", "zh": "許多"}, {"id": 392, "kana": "タクシー", "kanji": "", "pos": "名詞", "zh": "計程車"}, {"id": 393, "kana": "だす", "kanji": "出す", "pos": "動詞", "zh": "拿出；寄出"}, {"id": 394, "kana": "たつ", "kanji": "立つ", "pos": "動詞", "zh": "站立"}, {"id": 395, "kana": "たてもの", "kanji": "建物", "pos": "名詞", "zh": "建築物"}, {"id": 396, "kana": "たてる", "kanji": "建てる", "pos": "動詞", "zh": "建造"}, {"id": 397, "kana": "たのしい", "kanji": "楽しい", "pos": "い形容詞", "zh": "快樂的"}, {"id": 398, "kana": "たのむ", "kanji": "頼む", "pos": "動詞", "zh": "拜託"}, {"id": 399, "kana": "たばこ", "kanji": "", "pos": "名詞", "zh": "香菸"}, {"id": 400, "kana": "たぶん", "kanji": "", "pos": "副詞", "zh": "大概"}, {"id": 401, "kana": "たべもの", "kanji": "食べ物", "pos": "名詞", "zh": "食物"}, {"id": 402, "kana": "たべる", "kanji": "食べる", "pos": "動詞", "zh": "吃"}, {"id": 403, "kana": "たまご", "kanji": "卵", "pos": "名詞", "zh": "蛋"}, {"id": 404, "kana": "だれ", "kanji": "誰", "pos": "疑問詞", "zh": "誰"}, {"id": 405, "kana": "たんじょうび", "kanji": "誕生日", "pos": "名詞", "zh": "生日"}, {"id": 406, "kana": "だんだん", "kanji": "", "pos": "副詞", "zh": "漸漸"}, {"id": 407, "kana": "ちいさい", "kanji": "小さい", "pos": "い形容詞", "zh": "小的"}, {"id": 408, "kana": "ちかい", "kanji": "近い", "pos": "い形容詞", "zh": "近的"}, {"id": 409, "kana": "ちがう", "kanji": "違う", "pos": "動詞", "zh": "不同；錯"}, {"id": 410, "kana": "ちかく", "kanji": "近く", "pos": "名詞", "zh": "附近"}, {"id": 411, "kana": "ちかてつ", "kanji": "地下鉄", "pos": "名詞", "zh": "地鐵"}, {"id": 412, "kana": "ちず", "kanji": "地図", "pos": "名詞", "zh": "地圖"}, {"id": 413, "kana": "ちち", "kanji": "父", "pos": "名詞", "zh": "家父"}, {"id": 414, "kana": "ちゃいろ", "kanji": "茶色", "pos": "名詞", "zh": "咖啡色"}, {"id": 415, "kana": "ちゃわん", "kanji": "茶碗", "pos": "名詞", "zh": "碗"}, {"id": 416, "kana": "ちょうど", "kanji": "", "pos": "副詞", "zh": "剛好"}, {"id": 417, "kana": "チョコレート", "kanji": "", "pos": "名詞", "zh": "巧克力"}, {"id": 418, "kana": "ちょっと", "kanji": "", "pos": "副詞", "zh": "一下；稍微"}, {"id": 419, "kana": "ついたち", "kanji": "一日", "pos": "名詞", "zh": "一號"}, {"id": 420, "kana": "つかう", "kanji": "使う", "pos": "動詞", "zh": "使用"}, {"id": 421, "kana": "つかれる", "kanji": "疲れる", "pos": "動詞", "zh": "疲倦"}, {"id": 422, "kana": "つぎ", "kanji": "次", "pos": "名詞", "zh": "下一個"}, {"id": 423, "kana": "つく", "kanji": "着く", "pos": "動詞", "zh": "到達"}, {"id": 424, "kana": "つくえ", "kanji": "机", "pos": "名詞", "zh": "書桌"}, {"id": 425, "kana": "つくる", "kanji": "作る", "pos": "動詞", "zh": "製作"}, {"id": 426, "kana": "つける", "kanji": "", "pos": "動詞", "zh": "打開（電源）"}, {"id": 427, "kana": "つとめる", "kanji": "勤める", "pos": "動詞", "zh": "任職"}, {"id": 428, "kana": "つまらない", "kanji": "", "pos": "い形容詞", "zh": "無聊的"}, {"id": 429, "kana": "つめたい", "kanji": "冷たい", "pos": "い形容詞", "zh": "冰涼的"}, {"id": 430, "kana": "つよい", "kanji": "強い", "pos": "い形容詞", "zh": "強的"}, {"id": 431, "kana": "て", "kanji": "手", "pos": "名詞", "zh": "手"}, {"id": 432, "kana": "ティッシュペーパー", "kanji": "", "pos": "名詞", "zh": "面紙"}, {"id": 433, "kana": "テープ", "kanji": "", "pos": "名詞", "zh": "膠帶；錄音帶"}, {"id": 434, "kana": "テーブル", "kanji": "", "pos": "名詞", "zh": "桌子"}, {"id": 435, "kana": "でかける", "kanji": "出かける", "pos": "動詞", "zh": "外出"}, {"id": 436, "kana": "てがみ", "kanji": "手紙", "pos": "名詞", "zh": "信"}, {"id": 437, "kana": "できる", "kanji": "", "pos": "動詞", "zh": "會；能夠"}, {"id": 438, "kana": "でぐち", "kanji": "出口", "pos": "名詞", "zh": "出口"}, {"id": 439, "kana": "テスト", "kanji": "", "pos": "名詞", "zh": "考試"}, {"id": 440, "kana": "では", "kanji": "", "pos": "接續詞", "zh": "那麼"}, {"id": 441, "kana": "デパート", "kanji": "", "pos": "名詞", "zh": "百貨公司"}, {"id": 442, "kana": "でも", "kanji": "", "pos": "接續詞", "zh": "但是"}, {"id": 443, "kana": "でる", "kanji": "出る", "pos": "動詞", "zh": "出來；出去"}, {"id": 444, "kana": "テレビ", "kanji": "", "pos": "名詞", "zh": "電視"}, {"id": 445, "kana": "てんき", "kanji": "天気", "pos": "名詞", "zh": "天氣"}, {"id": 446, "kana": "でんき", "kanji": "電気", "pos": "名詞", "zh": "電；電燈"}, {"id": 447, "kana": "でんしゃ", "kanji": "電車", "pos": "名詞", "zh": "電車"}, {"id": 448, "kana": "でんわ", "kanji": "電話", "pos": "名詞", "zh": "電話"}, {"id": 449, "kana": "でんわする", "kanji": "電話する", "pos": "動詞", "zh": "打電話"}, {"id": 450, "kana": "でんわばんごう", "kanji": "電話番号", "pos": "名詞", "zh": "電話號碼"}, {"id": 451, "kana": "と", "kanji": "戸", "pos": "名詞", "zh": "門"}, {"id": 452, "kana": "ドア", "kanji": "", "pos": "名詞", "zh": "門"}, {"id": 453, "kana": "トイレ", "kanji": "", "pos": "名詞", "zh": "廁所"}, {"id": 454, "kana": "どう", "kanji": "", "pos": "疑問詞", "zh": "怎麼樣"}, {"id": 455, "kana": "とうきょう", "kanji": "東京", "pos": "名詞", "zh": "東京"}, {"id": 456, "kana": "どうして", "kanji": "", "pos": "疑問詞", "zh": "為什麼"}, {"id": 457, "kana": "どうぞ", "kanji": "", "pos": "副詞", "zh": "請"}, {"id": 458, "kana": "どうぶつ", "kanji": "動物", "pos": "名詞", "zh": "動物"}, {"id": 459, "kana": "どうも", "kanji": "", "pos": "副詞", "zh": "謝謝；實在"}, {"id": 460, "kana": "とお", "kanji": "十", "pos": "數詞", "zh": "十個"}, {"id": 461, "kana": "とおい", "kanji": "遠い", "pos": "い形容詞", "zh": "遠的"}, {"id": 462, "kana": "とおか", "kanji": "十日", "pos": "名詞", "zh": "十號"}, {"id": 463, "kana": "ときどき", "kanji": "時々", "pos": "副詞", "zh": "偶爾"}, {"id": 464, "kana": "とけい", "kanji": "時計", "pos": "名詞", "zh": "時鐘"}, {"id": 465, "kana": "どこ", "kanji": "", "pos": "疑問詞", "zh": "哪裡"}, {"id": 466, "kana": "ところ", "kanji": "所", "pos": "名詞", "zh": "地方"}, {"id": 467, "kana": "とし", "kanji": "年", "pos": "名詞", "zh": "年；年紀"}, {"id": 468, "kana": "としょかん", "kanji": "図書館", "pos": "名詞", "zh": "圖書館"}, {"id": 469, "kana": "どちら", "kanji": "", "pos": "疑問詞", "zh": "哪邊"}, {"id": 470, "kana": "とても", "kanji": "", "pos": "副詞", "zh": "非常"}, {"id": 471, "kana": "どなた", "kanji": "", "pos": "疑問詞", "zh": "哪位"}, {"id": 472, "kana": "となり", "kanji": "隣", "pos": "名詞", "zh": "隔壁"}, {"id": 473, "kana": "どの", "kanji": "", "pos": "連體詞", "zh": "哪個"}, {"id": 474, "kana": "とぶ", "kanji": "飛ぶ", "pos": "動詞", "zh": "飛"}, {"id": 475, "kana": "とまる", "kanji": "止まる", "pos": "動詞", "zh": "停止"}, {"id": 476, "kana": "ともだち", "kanji": "友達", "pos": "名詞", "zh": "朋友"}, {"id": 477, "kana": "どようび", "kanji": "土曜日", "pos": "名詞", "zh": "星期六"}, {"id": 478, "kana": "とり", "kanji": "鳥", "pos": "名詞", "zh": "鳥"}, {"id": 479, "kana": "とりにく", "kanji": "とり肉", "pos": "名詞", "zh": "雞肉"}, {"id": 480, "kana": "とる", "kanji": "取る", "pos": "動詞", "zh": "拿取"}, {"id": 481, "kana": "とる", "kanji": "撮る", "pos": "動詞", "zh": "拍攝"}, {"id": 482, "kana": "どれ", "kanji": "", "pos": "疑問詞", "zh": "哪一個"}, {"id": 483, "kana": "どんな", "kanji": "", "pos": "連體詞", "zh": "怎樣的"}, {"id": 484, "kana": "ナイフ", "kanji": "", "pos": "名詞", "zh": "刀子"}, {"id": 485, "kana": "なか", "kanji": "中", "pos": "名詞", "zh": "裡面"}, {"id": 486, "kana": "ながい", "kanji": "長い", "pos": "い形容詞", "zh": "長的"}, {"id": 487, "kana": "なく", "kanji": "鳴く", "pos": "動詞", "zh": "叫（動物）"}, {"id": 488, "kana": "なくす", "kanji": "", "pos": "動詞", "zh": "遺失"}, {"id": 489, "kana": "なぜ", "kanji": "", "pos": "疑問詞", "zh": "為何"}, {"id": 490, "kana": "なつ", "kanji": "夏", "pos": "名詞", "zh": "夏天"}, {"id": 491, "kana": "なつやすみ", "kanji": "夏休み", "pos": "名詞", "zh": "暑假"}, {"id": 492, "kana": "など", "kanji": "", "pos": "助詞", "zh": "等等"}, {"id": 493, "kana": "なな", "kanji": "七", "pos": "數詞", "zh": "七"}, {"id": 494, "kana": "ななつ", "kanji": "七つ", "pos": "數詞", "zh": "七個"}, {"id": 495, "kana": "なに", "kanji": "何", "pos": "疑問詞", "zh": "什麼"}, {"id": 496, "kana": "なのか", "kanji": "七日", "pos": "名詞", "zh": "七號"}, {"id": 497, "kana": "なまえ", "kanji": "名前", "pos": "名詞", "zh": "名字"}, {"id": 498, "kana": "ならう", "kanji": "習う", "pos": "動詞", "zh": "學習"}, {"id": 499, "kana": "ならぶ", "kanji": "並ぶ", "pos": "動詞", "zh": "排列"}, {"id": 500, "kana": "ならべる", "kanji": "並べる", "pos": "動詞", "zh": "排列（他）"}, {"id": 501, "kana": "なる", "kanji": "", "pos": "動詞", "zh": "變成"}, {"id": 502, "kana": "なんじ", "kanji": "何時", "pos": "疑問詞", "zh": "幾點"}, {"id": 503, "kana": "なんにん", "kanji": "何人", "pos": "疑問詞", "zh": "幾個人"}, {"id": 504, "kana": "にぎやか", "kanji": "", "pos": "な形容詞", "zh": "熱鬧"}, {"id": 505, "kana": "にく", "kanji": "肉", "pos": "名詞", "zh": "肉"}, {"id": 506, "kana": "にし", "kanji": "西", "pos": "名詞", "zh": "西"}, {"id": 507, "kana": "にちかん", "kanji": "日間", "pos": "數詞", "zh": "天（期間量詞）"}, {"id": 508, "kana": "にちようび", "kanji": "日曜日", "pos": "名詞", "zh": "星期日"}, {"id": 509, "kana": "にほんじん", "kanji": "日本人", "pos": "名詞", "zh": "日本人"}, {"id": 510, "kana": "にもつ", "kanji": "荷物", "pos": "名詞", "zh": "行李"}, {"id": 511, "kana": "ニュース", "kanji": "", "pos": "名詞", "zh": "新聞"}, {"id": 512, "kana": "にわ", "kanji": "庭", "pos": "名詞", "zh": "庭院"}, {"id": 513, "kana": "にん", "kanji": "人", "pos": "數詞", "zh": "人（計數）"}, {"id": 514, "kana": "ぬぐ", "kanji": "脱ぐ", "pos": "動詞", "zh": "脫"}, {"id": 515, "kana": "ぬるい", "kanji": "", "pos": "い形容詞", "zh": "微溫的"}, {"id": 516, "kana": "ネクタイ", "kanji": "", "pos": "名詞", "zh": "領帶"}, {"id": 517, "kana": "ねこ", "kanji": "猫", "pos": "名詞", "zh": "貓"}, {"id": 518, "kana": "ねる", "kanji": "寝る", "pos": "動詞", "zh": "睡覺"}, {"id": 519, "kana": "ねん", "kanji": "年", "pos": "名詞", "zh": "年"}, {"id": 520, "kana": "ノート", "kanji": "", "pos": "名詞", "zh": "筆記本"}, {"id": 521, "kana": "のぼる", "kanji": "登る", "pos": "動詞", "zh": "登上"}, {"id": 522, "kana": "のみもの", "kanji": "飲み物", "pos": "名詞", "zh": "飲料"}, {"id": 523, "kana": "のむ", "kanji": "飲む", "pos": "動詞", "zh": "喝"}, {"id": 524, "kana": "のる", "kanji": "乗る", "pos": "動詞", "zh": "搭乘"}, {"id": 525, "kana": "は", "kanji": "歯", "pos": "名詞", "zh": "牙齒"}, {"id": 526, "kana": "パーティー", "kanji": "", "pos": "名詞", "zh": "派對"}, {"id": 527, "kana": "はい", "kanji": "", "pos": "感嘆詞", "zh": "是"}, {"id": 528, "kana": "はい", "kanji": "杯", "pos": "數詞", "zh": "杯"}, {"id": 529, "kana": "はいざら", "kanji": "灰皿", "pos": "名詞", "zh": "煙灰缸"}, {"id": 530, "kana": "はいる", "kanji": "入る", "pos": "動詞", "zh": "進入"}, {"id": 531, "kana": "はがき", "kanji": "", "pos": "名詞", "zh": "明信片"}, {"id": 532, "kana": "はく", "kanji": "", "pos": "動詞", "zh": "穿（下身）"}, {"id": 533, "kana": "はこ", "kanji": "箱", "pos": "名詞", "zh": "箱子"}, {"id": 534, "kana": "はし", "kanji": "橋", "pos": "名詞", "zh": "橋"}, {"id": 535, "kana": "はし", "kanji": "", "pos": "名詞", "zh": "筷子"}, {"id": 536, "kana": "はじまる", "kanji": "始まる", "pos": "動詞", "zh": "開始"}, {"id": 537, "kana": "はじめ", "kanji": "初め", "pos": "名詞", "zh": "起初"}, {"id": 538, "kana": "はじめて", "kanji": "初めて", "pos": "副詞", "zh": "第一次"}, {"id": 539, "kana": "はしる", "kanji": "走る", "pos": "動詞", "zh": "跑"}, {"id": 540, "kana": "バス", "kanji": "", "pos": "名詞", "zh": "公車"}, {"id": 541, "kana": "バスケットボール", "kanji": "", "pos": "名詞", "zh": "籃球"}, {"id": 542, "kana": "バスてい", "kanji": "バス停", "pos": "名詞", "zh": "公車站"}, {"id": 543, "kana": "バター", "kanji": "", "pos": "名詞", "zh": "奶油"}, {"id": 544, "kana": "はたち", "kanji": "二十歳", "pos": "名詞", "zh": "二十歲"}, {"id": 545, "kana": "はたらく", "kanji": "働く", "pos": "動詞", "zh": "工作"}, {"id": 546, "kana": "はち", "kanji": "八", "pos": "數詞", "zh": "八"}, {"id": 547, "kana": "はちがつ", "kanji": "8月", "pos": "名詞", "zh": "八月"}, {"id": 548, "kana": "はつか", "kanji": "二十日", "pos": "名詞", "zh": "二十號"}, {"id": 549, "kana": "はっぴゃくえん", "kanji": "八百円", "pos": "名詞", "zh": "八百日圓"}, {"id": 550, "kana": "はな", "kanji": "花", "pos": "名詞", "zh": "花"}, {"id": 551, "kana": "はな", "kanji": "鼻", "pos": "名詞", "zh": "鼻子"}, {"id": 552, "kana": "はなし", "kanji": "話", "pos": "名詞", "zh": "話；故事"}, {"id": 553, "kana": "はなす", "kanji": "話す", "pos": "動詞", "zh": "說話"}, {"id": 554, "kana": "バナナ", "kanji": "", "pos": "名詞", "zh": "香蕉"}, {"id": 555, "kana": "はは", "kanji": "母", "pos": "名詞", "zh": "家母"}, {"id": 556, "kana": "はやい", "kanji": "早い", "pos": "い形容詞", "zh": "早的"}, {"id": 557, "kana": "はやい", "kanji": "速い", "pos": "い形容詞", "zh": "快的"}, {"id": 558, "kana": "はる", "kanji": "春", "pos": "名詞", "zh": "春天"}, {"id": 559, "kana": "はる", "kanji": "貼る", "pos": "動詞", "zh": "貼"}, {"id": 560, "kana": "はれ", "kanji": "晴れ", "pos": "名詞", "zh": "晴天"}, {"id": 561, "kana": "はれる", "kanji": "晴れる", "pos": "動詞", "zh": "放晴"}, {"id": 562, "kana": "はん", "kanji": "半", "pos": "名詞", "zh": "半"}, {"id": 563, "kana": "ばん", "kanji": "晩", "pos": "名詞", "zh": "晚上"}, {"id": 564, "kana": "パン", "kanji": "", "pos": "名詞", "zh": "麵包"}, {"id": 565, "kana": "ハンカチ", "kanji": "", "pos": "名詞", "zh": "手帕"}, {"id": 566, "kana": "ばんごう", "kanji": "番号", "pos": "名詞", "zh": "號碼"}, {"id": 567, "kana": "ばんごはん", "kanji": "晩御飯", "pos": "名詞", "zh": "晚飯"}, {"id": 568, "kana": "はんぶん", "kanji": "半分", "pos": "名詞", "zh": "一半"}, {"id": 569, "kana": "パンや", "kanji": "パン屋", "pos": "名詞", "zh": "麵包店"}, {"id": 570, "kana": "ひ", "kanji": "日", "pos": "名詞", "zh": "日子"}, {"id": 571, "kana": "ピアノ", "kanji": "", "pos": "名詞", "zh": "鋼琴"}, {"id": 572, "kana": "ひがし", "kanji": "東", "pos": "名詞", "zh": "東"}, {"id": 573, "kana": "ひき", "kanji": "匹", "pos": "數詞", "zh": "匹（計數）"}, {"id": 574, "kana": "ひく", "kanji": "引く", "pos": "動詞", "zh": "拉；查（字典）"}, {"id": 575, "kana": "ひく", "kanji": "弾く", "pos": "動詞", "zh": "彈奏"}, {"id": 576, "kana": "ひくい", "kanji": "低い", "pos": "い形容詞", "zh": "矮；低"}, {"id": 577, "kana": "ひこうき", "kanji": "飛行機", "pos": "名詞", "zh": "飛機"}, {"id": 578, "kana": "ピザや", "kanji": "ピザ屋", "pos": "名詞", "zh": "披薩店"}, {"id": 579, "kana": "ひだり", "kanji": "左", "pos": "名詞", "zh": "左"}, {"id": 580, "kana": "ひだりがわ", "kanji": "左側", "pos": "名詞", "zh": "左側、左邊"}, {"id": 581, "kana": "ひと", "kanji": "人", "pos": "名詞", "zh": "人"}, {"id": 582, "kana": "ひとつ", "kanji": "一つ", "pos": "數詞", "zh": "一個"}, {"id": 583, "kana": "ひとつき", "kanji": "一月", "pos": "名詞", "zh": "一個月"}, {"id": 584, "kana": "ひとり", "kanji": "一人", "pos": "名詞", "zh": "一人"}, {"id": 585, "kana": "ひま", "kanji": "暇", "pos": "な形容詞", "zh": "空閒"}, {"id": 586, "kana": "ひゃく", "kanji": "百", "pos": "數詞", "zh": "百"}, {"id": 587, "kana": "ひゃくにん", "kanji": "百人", "pos": "數詞", "zh": "一百人"}, {"id": 588, "kana": "びょういん", "kanji": "病院", "pos": "名詞", "zh": "醫院"}, {"id": 589, "kana": "びょうき", "kanji": "病気", "pos": "名詞", "zh": "生病"}, {"id": 590, "kana": "ひらがな", "kanji": "平仮名", "pos": "名詞", "zh": "平假名"}, {"id": 591, "kana": "ひる", "kanji": "昼", "pos": "名詞", "zh": "中午"}, {"id": 592, "kana": "ビル", "kanji": "", "pos": "名詞", "zh": "大樓"}, {"id": 593, "kana": "ひるごはん", "kanji": "昼御飯", "pos": "名詞", "zh": "午餐"}, {"id": 594, "kana": "ひろい", "kanji": "広い", "pos": "い形容詞", "zh": "寬廣"}, {"id": 595, "kana": "フィルム", "kanji": "", "pos": "名詞", "zh": "底片"}, {"id": 596, "kana": "ふうとう", "kanji": "封筒", "pos": "名詞", "zh": "信封"}, {"id": 597, "kana": "プール", "kanji": "", "pos": "名詞", "zh": "游泳池"}, {"id": 598, "kana": "フォーク", "kanji": "", "pos": "名詞", "zh": "叉子"}, {"id": 599, "kana": "ふく", "kanji": "服", "pos": "名詞", "zh": "衣服"}, {"id": 600, "kana": "ふく", "kanji": "吹く", "pos": "動詞", "zh": "吹"}, {"id": 601, "kana": "ふたつ", "kanji": "二つ", "pos": "數詞", "zh": "兩個"}, {"id": 602, "kana": "ぶたにく", "kanji": "豚肉", "pos": "名詞", "zh": "豬肉"}, {"id": 603, "kana": "ふたり", "kanji": "二人", "pos": "名詞", "zh": "兩人"}, {"id": 604, "kana": "ふつか", "kanji": "二日", "pos": "名詞", "zh": "二號；兩天"}, {"id": 605, "kana": "ふとい", "kanji": "太い", "pos": "い形容詞", "zh": "粗的"}, {"id": 606, "kana": "ふゆ", "kanji": "冬", "pos": "名詞", "zh": "冬天"}, {"id": 607, "kana": "ふゆやすみ", "kanji": "冬休み", "pos": "名詞", "zh": "寒假"}, {"id": 608, "kana": "ふる", "kanji": "降る", "pos": "動詞", "zh": "下（雨雪）"}, {"id": 609, "kana": "ふるい", "kanji": "古い", "pos": "い形容詞", "zh": "舊的"}, {"id": 610, "kana": "ふろ", "kanji": "風呂", "pos": "名詞", "zh": "浴缸；洗澡"}, {"id": 611, "kana": "ふん", "kanji": "分", "pos": "名詞", "zh": "分（時間）"}, {"id": 612, "kana": "ページ", "kanji": "", "pos": "名詞", "zh": "頁"}, {"id": 613, "kana": "へた", "kanji": "下手", "pos": "な形容詞", "zh": "不擅長"}, {"id": 614, "kana": "ベッド", "kanji": "", "pos": "名詞", "zh": "床"}, {"id": 615, "kana": "ペット", "kanji": "", "pos": "名詞", "zh": "寵物"}, {"id": 616, "kana": "へや", "kanji": "部屋", "pos": "名詞", "zh": "房間"}, {"id": 617, "kana": "へん", "kanji": "辺", "pos": "名詞", "zh": "附近"}, {"id": 618, "kana": "ペン", "kanji": "", "pos": "名詞", "zh": "筆"}, {"id": 619, "kana": "べんきょう", "kanji": "勉強", "pos": "名詞", "zh": "學習"}, {"id": 620, "kana": "べんり", "kanji": "便利", "pos": "な形容詞", "zh": "方便"}, {"id": 621, "kana": "ぼうし", "kanji": "帽子", "pos": "名詞", "zh": "帽子"}, {"id": 622, "kana": "ボールペン", "kanji": "", "pos": "名詞", "zh": "原子筆"}, {"id": 623, "kana": "ほか", "kanji": "外", "pos": "名詞", "zh": "其他"}, {"id": 624, "kana": "ポケット", "kanji": "", "pos": "名詞", "zh": "口袋"}, {"id": 625, "kana": "ほしい", "kanji": "欲しい", "pos": "い形容詞", "zh": "想要"}, {"id": 626, "kana": "ポスト", "kanji": "", "pos": "名詞", "zh": "郵筒"}, {"id": 627, "kana": "ほそい", "kanji": "細い", "pos": "い形容詞", "zh": "細的"}, {"id": 628, "kana": "ボタン", "kanji": "", "pos": "名詞", "zh": "鈕扣；按鈕"}, {"id": 629, "kana": "ホテル", "kanji": "", "pos": "名詞", "zh": "飯店"}, {"id": 630, "kana": "ほん", "kanji": "本", "pos": "名詞", "zh": "書"}, {"id": 631, "kana": "ほん", "kanji": "本", "pos": "數詞", "zh": "瓶；支（計數）"}, {"id": 632, "kana": "ほんだな", "kanji": "本棚", "pos": "名詞", "zh": "書架"}, {"id": 633, "kana": "ほんとう", "kanji": "本当", "pos": "名詞", "zh": "真的"}, {"id": 634, "kana": "ほんや", "kanji": "本屋", "pos": "名詞", "zh": "書店"}, {"id": 635, "kana": "まいあさ", "kanji": "毎朝", "pos": "名詞", "zh": "每天早上"}, {"id": 636, "kana": "まいしゅう", "kanji": "毎週", "pos": "名詞", "zh": "每週"}, {"id": 637, "kana": "まいつき", "kanji": "毎月", "pos": "名詞", "zh": "每月"}, {"id": 638, "kana": "まいとし", "kanji": "毎年", "pos": "名詞", "zh": "每年"}, {"id": 639, "kana": "まいにち", "kanji": "毎日", "pos": "名詞", "zh": "每天"}, {"id": 640, "kana": "まいばん", "kanji": "毎晩", "pos": "名詞", "zh": "每天晚上"}, {"id": 641, "kana": "まえ", "kanji": "前", "pos": "名詞", "zh": "前面"}, {"id": 642, "kana": "まがる", "kanji": "曲がる", "pos": "動詞", "zh": "轉彎"}, {"id": 643, "kana": "ましょう", "kanji": "", "pos": "其他", "zh": "～吧（邀請對方一起做）"}, {"id": 644, "kana": "まずい", "kanji": "", "pos": "い形容詞", "zh": "難吃"}, {"id": 645, "kana": "また", "kanji": "", "pos": "副詞", "zh": "再、又"}, {"id": 646, "kana": "まだ", "kanji": "", "pos": "副詞", "zh": "還、尚未"}, {"id": 647, "kana": "まち", "kanji": "町", "pos": "名詞", "zh": "城鎮"}, {"id": 648, "kana": "まつ", "kanji": "待つ", "pos": "動詞", "zh": "等待"}, {"id": 649, "kana": "まっすぐ", "kanji": "", "pos": "な形容詞", "zh": "筆直"}, {"id": 650, "kana": "マッチ", "kanji": "", "pos": "名詞", "zh": "火柴"}, {"id": 651, "kana": "まど", "kanji": "窓", "pos": "名詞", "zh": "窗戶"}, {"id": 652, "kana": "まるい", "kanji": "丸い", "pos": "い形容詞", "zh": "圓的"}, {"id": 653, "kana": "まん", "kanji": "万", "pos": "數詞", "zh": "萬"}, {"id": 654, "kana": "まんねんひつ", "kanji": "万年筆", "pos": "名詞", "zh": "鋼筆"}, {"id": 655, "kana": "みがく", "kanji": "磨く", "pos": "動詞", "zh": "刷、磨"}, {"id": 656, "kana": "みかん", "kanji": "", "pos": "名詞", "zh": "橘子"}, {"id": 657, "kana": "みぎ", "kanji": "右", "pos": "名詞", "zh": "右邊"}, {"id": 658, "kana": "みじかい", "kanji": "短い", "pos": "い形容詞", "zh": "短的"}, {"id": 659, "kana": "みず", "kanji": "水", "pos": "名詞", "zh": "水"}, {"id": 660, "kana": "みせ", "kanji": "店", "pos": "名詞", "zh": "店家"}, {"id": 661, "kana": "みせる", "kanji": "見せる", "pos": "動詞", "zh": "給人看"}, {"id": 662, "kana": "みち", "kanji": "道", "pos": "名詞", "zh": "道路"}, {"id": 663, "kana": "みっか", "kanji": "三日", "pos": "名詞", "zh": "三號、三天"}, {"id": 664, "kana": "みっつ", "kanji": "三つ", "pos": "數詞", "zh": "三個"}, {"id": 665, "kana": "みどり", "kanji": "緑", "pos": "名詞", "zh": "綠色"}, {"id": 666, "kana": "みなさん", "kanji": "皆さん", "pos": "代名詞", "zh": "大家"}, {"id": 667, "kana": "みなみ", "kanji": "南", "pos": "名詞", "zh": "南邊"}, {"id": 668, "kana": "みなみがわ", "kanji": "南がわ", "pos": "名詞", "zh": "南邊"}, {"id": 669, "kana": "みみ", "kanji": "耳", "pos": "名詞", "zh": "耳朵"}, {"id": 670, "kana": "みる", "kanji": "見る", "pos": "動詞", "zh": "看"}, {"id": 671, "kana": "みんな", "kanji": "", "pos": "代名詞", "zh": "全部、大家"}, {"id": 672, "kana": "むいか", "kanji": "六日", "pos": "名詞", "zh": "六號、六天"}, {"id": 673, "kana": "むこう", "kanji": "向こう", "pos": "名詞", "zh": "對面、那邊"}, {"id": 674, "kana": "むずかしい", "kanji": "難しい", "pos": "い形容詞", "zh": "困難的"}, {"id": 675, "kana": "むっつ", "kanji": "六つ", "pos": "數詞", "zh": "六個"}, {"id": 676, "kana": "むら", "kanji": "村", "pos": "名詞", "zh": "村莊"}, {"id": 677, "kana": "め", "kanji": "目", "pos": "名詞", "zh": "眼睛"}, {"id": 678, "kana": "メートル", "kanji": "", "pos": "名詞", "zh": "公尺"}, {"id": 679, "kana": "めがね", "kanji": "眼鏡", "pos": "名詞", "zh": "眼鏡"}, {"id": 680, "kana": "メモ", "kanji": "", "pos": "名詞", "zh": "筆記、便條"}, {"id": 681, "kana": "もう", "kanji": "", "pos": "副詞", "zh": "已經"}, {"id": 682, "kana": "もくようび", "kanji": "木曜日", "pos": "名詞", "zh": "星期四"}, {"id": 683, "kana": "もしもし", "kanji": "", "pos": "感嘆詞", "zh": "喂（電話）"}, {"id": 684, "kana": "もつ", "kanji": "持つ", "pos": "動詞", "zh": "拿、持有"}, {"id": 685, "kana": "もっと", "kanji": "", "pos": "副詞", "zh": "更加"}, {"id": 686, "kana": "もの", "kanji": "物", "pos": "名詞", "zh": "東西"}, {"id": 687, "kana": "もらう", "kanji": "", "pos": "動詞", "zh": "得到、收到"}, {"id": 688, "kana": "もん", "kanji": "門", "pos": "名詞", "zh": "門"}, {"id": 689, "kana": "もんだい", "kanji": "問題", "pos": "名詞", "zh": "問題"}, {"id": 690, "kana": "やおや", "kanji": "八百屋", "pos": "名詞", "zh": "蔬果店"}, {"id": 691, "kana": "やさい", "kanji": "野菜", "pos": "名詞", "zh": "蔬菜"}, {"id": 692, "kana": "やさしい", "kanji": "易しい", "pos": "い形容詞", "zh": "容易的"}, {"id": 693, "kana": "やすい", "kanji": "安い", "pos": "い形容詞", "zh": "便宜的"}, {"id": 694, "kana": "やすみ", "kanji": "休み", "pos": "名詞", "zh": "休假"}, {"id": 695, "kana": "やすむ", "kanji": "休む", "pos": "動詞", "zh": "休息"}, {"id": 696, "kana": "やっつ", "kanji": "八つ", "pos": "數詞", "zh": "八個"}, {"id": 697, "kana": "やま", "kanji": "山", "pos": "名詞", "zh": "山"}, {"id": 698, "kana": "やる", "kanji": "", "pos": "動詞", "zh": "做、給"}, {"id": 699, "kana": "ゆうがた", "kanji": "夕方", "pos": "名詞", "zh": "傍晚"}, {"id": 700, "kana": "ゆうはん", "kanji": "夕飯", "pos": "名詞", "zh": "晚飯"}, {"id": 701, "kana": "ゆうびんきょく", "kanji": "郵便局", "pos": "名詞", "zh": "郵局"}, {"id": 702, "kana": "ゆうべ", "kanji": "夕べ", "pos": "名詞", "zh": "昨晚"}, {"id": 703, "kana": "ゆうめい", "kanji": "有名", "pos": "な形容詞", "zh": "有名"}, {"id": 704, "kana": "ゆき", "kanji": "雪", "pos": "名詞", "zh": "雪"}, {"id": 705, "kana": "ゆっくり", "kanji": "", "pos": "副詞", "zh": "慢慢地"}, {"id": 706, "kana": "ようか", "kanji": "八日", "pos": "名詞", "zh": "八號、八天"}, {"id": 707, "kana": "ようふく", "kanji": "洋服", "pos": "名詞", "zh": "西式服裝"}, {"id": 708, "kana": "よく", "kanji": "", "pos": "副詞", "zh": "經常、很"}, {"id": 709, "kana": "よこ", "kanji": "横", "pos": "名詞", "zh": "旁邊、橫"}, {"id": 710, "kana": "よじ", "kanji": "四時", "pos": "名詞", "zh": "四點"}, {"id": 711, "kana": "よっか", "kanji": "四日", "pos": "名詞", "zh": "四號、四天"}, {"id": 712, "kana": "よっつ", "kanji": "四つ", "pos": "數詞", "zh": "四個"}, {"id": 713, "kana": "よにん", "kanji": "四人", "pos": "數詞", "zh": "四個人"}, {"id": 714, "kana": "よぶ", "kanji": "呼ぶ", "pos": "動詞", "zh": "呼叫、邀請"}, {"id": 715, "kana": "よむ", "kanji": "読む", "pos": "動詞", "zh": "讀"}, {"id": 716, "kana": "よる", "kanji": "夜", "pos": "名詞", "zh": "夜晚"}, {"id": 717, "kana": "よわい", "kanji": "弱い", "pos": "い形容詞", "zh": "弱的"}, {"id": 718, "kana": "ラーメン", "kanji": "", "pos": "名詞", "zh": "拉麵"}, {"id": 719, "kana": "らいげつ", "kanji": "来月", "pos": "名詞", "zh": "下個月"}, {"id": 720, "kana": "らいしゅう", "kanji": "来週", "pos": "名詞", "zh": "下週"}, {"id": 721, "kana": "らいねん", "kanji": "来年", "pos": "名詞", "zh": "明年"}, {"id": 722, "kana": "ラジオ", "kanji": "", "pos": "名詞", "zh": "收音機"}, {"id": 723, "kana": "ラジカセ", "kanji": "", "pos": "名詞", "zh": "手提收錄音機"}, {"id": 724, "kana": "りっぱ", "kanji": "立派", "pos": "な形容詞", "zh": "出色、氣派"}, {"id": 725, "kana": "りゅうがくせい", "kanji": "留学生", "pos": "名詞", "zh": "留學生"}, {"id": 726, "kana": "りょうしん", "kanji": "両親", "pos": "名詞", "zh": "父母"}, {"id": 727, "kana": "りょうり", "kanji": "料理", "pos": "名詞", "zh": "料理"}, {"id": 728, "kana": "りょこう", "kanji": "旅行", "pos": "名詞", "zh": "旅行"}, {"id": 729, "kana": "りんご", "kanji": "", "pos": "名詞", "zh": "蘋果"}, {"id": 730, "kana": "れい", "kanji": "零", "pos": "數詞", "zh": "零"}, {"id": 731, "kana": "れいぞうこ", "kanji": "冷蔵庫", "pos": "名詞", "zh": "冰箱"}, {"id": 732, "kana": "レコード", "kanji": "", "pos": "名詞", "zh": "唱片"}, {"id": 733, "kana": "レストラン", "kanji": "", "pos": "名詞", "zh": "餐廳"}, {"id": 734, "kana": "れんしゅう", "kanji": "練習", "pos": "名詞", "zh": "練習"}, {"id": 735, "kana": "ろうか", "kanji": "廊下", "pos": "名詞", "zh": "走廊"}, {"id": 736, "kana": "ろく", "kanji": "六", "pos": "數詞", "zh": "六"}, {"id": 737, "kana": "ろくまんえん", "kanji": "六万円", "pos": "名詞", "zh": "六萬日圓"}, {"id": 738, "kana": "ろっぽん", "kanji": "六本", "pos": "數詞", "zh": "六支、六瓶（細長物）"}, {"id": 739, "kana": "ワイシャツ", "kanji": "", "pos": "名詞", "zh": "襯衫"}, {"id": 740, "kana": "わかい", "kanji": "若い", "pos": "い形容詞", "zh": "年輕的"}, {"id": 741, "kana": "わかる", "kanji": "分かる", "pos": "動詞", "zh": "懂、明白"}, {"id": 742, "kana": "わすれる", "kanji": "忘れる", "pos": "動詞", "zh": "忘記"}, {"id": 743, "kana": "わたくし", "kanji": "私", "pos": "代名詞", "zh": "我（敬）"}, {"id": 744, "kana": "わたし", "kanji": "私", "pos": "代名詞", "zh": "我"}, {"id": 745, "kana": "わたす", "kanji": "渡す", "pos": "動詞", "zh": "交給、遞"}, {"id": 746, "kana": "わたる", "kanji": "渡る", "pos": "動詞", "zh": "渡過、穿越"}, {"id": 747, "kana": "わるい", "kanji": "悪い", "pos": "い形容詞", "zh": "壞的"}, {"id": 748, "kana": "を", "kanji": "", "pos": "助詞", "zh": "（受詞助詞）"}];
+
+  // ==========================================
+  // 2. 狀態管理與 localStorage 持久化
+  // ==========================================
+  const STORAGE_KEY = "jlpt_n5_quiz_progress_v1";
+  let progress = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+
+  function saveProgress() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+    updateStatsUI();
+  }
+
+  function getWordStat(id) {
+    if (!progress[id]) progress[id] = { seen: 0, wrong: 0 };
+    return progress[id];
+  }
+
+  function updateStatsUI() {
+    const total = vocabData.length;
+    let seenCount = 0;
+    let mistakeCount = 0;
+    vocabData.forEach(w => {
+      const s = getWordStat(w.id);
+      if (s.seen > 0) seenCount++;
+      if (s.wrong > 0) mistakeCount++;
+    });
+    document.getElementById("stat-total").textContent = total;
+    document.getElementById("stat-seen").textContent = seenCount;
+    document.getElementById("stat-mistakes").textContent = mistakeCount;
+    document.getElementById("btn-mistake-count").textContent = mistakeCount;
+  }
+
+  // ==========================================
+  // 3. 智慧出題演算法 (前5錯題 + 後15新題/平均題)
+  // ==========================================
+  let currentMode = "";
+  let quizQueue = [];
+  let currentIndex = 0;
+  let score = 0;
+
+  function shuffle(arr) {
+    const copy = [...arr];
+    for (let i = copy.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+  }
+
+  function startQuiz(mode) {
+    currentMode = mode;
+    currentIndex = 0;
+    score = 0;
+
+    // 模式二僅挑選含有漢字的單字
+    const pool = mode === "kanji-to-kana"
+      ? vocabData.filter(w => w.kanji && w.kanji.trim() !== "")
+      : [...vocabData];
+
+    // 1. 前 5 題：從過去做錯的題目 (wrong > 0) 中隨機抽取最多 5 題
+    const mistakePool = shuffle(pool.filter(w => getWordStat(w.id).wrong > 0));
+    const selectedMistakes = mistakePool.slice(0, 5).map(w => ({ ...w, qType: "review" }));
+    const selectedIds = new Set(selectedMistakes.map(w => w.id));
+
+    // 2. 後 15 題（若錯題不足 5 題則自動補滿至 20 題）：
+    const neededCount = 20 - selectedMistakes.length;
+    const remainingPool = pool.filter(w => !selectedIds.has(w.id));
+
+    // 優先從「完全沒做過的新單字 (seen === 0)」中隨機抽取
+    const unseenPool = shuffle(remainingPool.filter(w => getWordStat(w.id).seen === 0));
+    let selectedOthers = unseenPool.slice(0, neededCount).map(w => ({ ...w, qType: "new" }));
+
+    // 當所有新單字都做完後，才從「過去做過但目前無錯誤」的題目中，依出現次數 (seen) 由少到多平均挑選
+    if (selectedOthers.length < neededCount) {
+      const otherIds = new Set(selectedOthers.map(w => w.id));
+      const seenNoMistakePool = shuffle(remainingPool.filter(w => !otherIds.has(w.id)))
+        .sort((a, b) => getWordStat(a.id).seen - getWordStat(b.id).seen);
+      const extra = seenNoMistakePool
+        .slice(0, neededCount - selectedOthers.length)
+        .map(w => ({ ...w, qType: "mastered" }));
+      selectedOthers = selectedOthers.concat(extra);
+    }
+
+    quizQueue = [...selectedMistakes, ...selectedOthers];
+
+    showView("quiz-view");
+    renderQuestion();
+  }
+
+  // ==========================================
+  // 4. 渲染題目與日文語音合成
+  // ==========================================
+  function speakJapanese(text, rate = 0.9) {
+    if (!("speechSynthesis" in window)) return;
+    window.speechSynthesis.cancel();
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = "ja-JP";
+    utter.rate = rate;
+    window.speechSynthesis.speak(utter);
+  }
+
+  function playCurrentAudio(rate = 0.9) {
+    const q = quizQueue[currentIndex];
+    speakJapanese(q.kana, rate);
+  }
+
+  function renderQuestion() {
+    const q = quizQueue[currentIndex];
+    document.getElementById("q-progress").textContent = `第 ${currentIndex + 1} / ${quizQueue.length} 題`;
+
+    const badge = document.getElementById("q-type-badge");
+    if (q.qType === "review") {
+      badge.textContent = "錯題複習";
+      badge.className = "badge badge-review";
+    } else if (q.qType === "new") {
+      badge.textContent = "新單字";
+      badge.className = "badge badge-new";
+    } else {
+      badge.textContent = "已熟練循環";
+      badge.className = "badge badge-mastered";
+    }
+
+    const promptLabel = document.getElementById("q-prompt-label");
+    const qContent = document.getElementById("q-content");
+    const posTag = document.getElementById("q-pos-tag");
+    const audioBtn = document.getElementById("q-audio-btn");
+    const slowBtn = document.getElementById("q-audio-slow-btn");
+
+    audioBtn.classList.add("hidden");
+    slowBtn.classList.add("hidden");
+    posTag.textContent = q.pos;
+
+    if (currentMode === "zh-to-kana") {
+      promptLabel.textContent = "請選出對應的日文假名：";
+      qContent.textContent = q.zh;
+    } else if (currentMode === "kanji-to-kana") {
+      promptLabel.textContent = "請選出此日文漢字的正確讀音（假名）：";
+      qContent.textContent = q.kanji;
+    } else if (currentMode === "audio-to-zh") {
+      promptLabel.textContent = "請聆聽發音並選出正確的中文意思：";
+      qContent.textContent = "🎧 請聽發音作答";
+      audioBtn.classList.remove("hidden");
+      slowBtn.classList.remove("hidden");
+      speakJapanese(q.kana, 0.9);
+    }
+
+    // 產生 4 個不重複的選項（避免同假名或同中文干擾項造成多解）
+    const candidateDistractors = shuffle(
+      vocabData.filter(w => w.id !== q.id && w.kana !== q.kana && w.zh !== q.zh)
+    );
+    const uniqueDistractors = [];
+    const usedTexts = new Set([currentMode === "audio-to-zh" ? q.zh : q.kana]);
+
+    for (const item of candidateDistractors) {
+      const label = currentMode === "audio-to-zh" ? item.zh : item.kana;
+      if (!usedTexts.has(label)) {
+        usedTexts.add(label);
+        uniqueDistractors.push(item);
+      }
+      if (uniqueDistractors.length === 3) break;
+    }
+
+    const options = shuffle([q, ...uniqueDistractors]);
+    const optionsContainer = document.getElementById("options-container");
+    optionsContainer.innerHTML = "";
+
+    options.forEach(opt => {
+      const btn = document.createElement("button");
+      btn.className = "option-btn";
+      btn.textContent = currentMode === "audio-to-zh" ? opt.zh : opt.kana;
+      btn.onclick = () => handleAnswer(btn, opt.id === q.id, q);
+      optionsContainer.appendChild(btn);
+    });
+
+    document.getElementById("feedback-box").classList.add("hidden");
+    document.getElementById("next-btn").classList.add("hidden");
+  }
+
+  function handleAnswer(selectedBtn, isCorrect, questionWord) {
+    const allBtns = document.querySelectorAll(".option-btn");
+    allBtns.forEach(b => b.disabled = true);
+
+    const stat = getWordStat(questionWord.id);
+    stat.seen += 1;
+
+    const feedbackBox = document.getElementById("feedback-box");
+    feedbackBox.classList.remove("hidden");
+
+    const wordDisplay = `${questionWord.kana}${questionWord.kanji ? `（${questionWord.kanji}）` : ""} [${questionWord.pos}] ：${questionWord.zh}`;
+
+    if (isCorrect) {
+      selectedBtn.classList.add("correct");
+      score++;
+      // 若為錯題複習且答對，從錯題狀態移除
+      if (stat.wrong > 0) stat.wrong = 0;
+      feedbackBox.style.background = "#dcfce7";
+      feedbackBox.style.color = "#14532d";
+      feedbackBox.textContent = `⭕ 答對了！ ${wordDisplay}`;
+    } else {
+      selectedBtn.classList.add("wrong");
+      stat.wrong += 1;
+      const correctText = currentMode === "audio-to-zh" ? questionWord.zh : questionWord.kana;
+      allBtns.forEach(b => {
+        if (b.textContent === correctText) b.classList.add("correct");
+      });
+      feedbackBox.style.background = "#fee2e2";
+      feedbackBox.style.color = "#7f1d1d";
+      feedbackBox.textContent = `❌ 答錯了（已加入錯題本）！正解：${wordDisplay}`;
+    }
+
+    speakJapanese(questionWord.kana, 0.9);
+    saveProgress();
+    document.getElementById("next-btn").classList.remove("hidden");
+  }
+
+  function nextQuestion() {
+    currentIndex++;
+    if (currentIndex < quizQueue.length) {
+      renderQuestion();
+    } else {
+      document.getElementById("final-score").textContent = score;
+      document.getElementById("result-summary").textContent = `本輪答對 ${score} 題，答錯 ${quizQueue.length - score} 題。錯題已自動收錄至錯題記錄本，下次測驗前 5 題將優先複習。`;
+      showView("result-view");
+    }
+  }
+
+  // ==========================================
+  // 5. 錯題記錄本與完整單字庫
+  // ==========================================
+  function openMistakeBook() {
+    const container = document.getElementById("mistake-list-container");
+    const mistakes = vocabData.filter(w => getWordStat(w.id).wrong > 0);
+
+    if (mistakes.length === 0) {
+      container.innerHTML = `<p style="text-align:center; color:var(--muted); padding:28px;">目前沒有錯題，繼續保持！🎉</p>`;
+    } else {
+      container.innerHTML = mistakes.map(w => `
+        <div class="mistake-item">
+          <div>
+            <strong style="font-size:1.1rem;">${w.kana}</strong>
+            ${w.kanji ? `<span style="color:var(--primary); margin-left:6px; font-weight:600;">[${w.kanji}]</span>` : ""}
+            <span class="pos-tag" style="margin-left:6px;">${w.pos}</span>
+            <div style="color:var(--muted); font-size:0.9rem; margin-top:4px;">${w.zh}（累計錯誤 ${getWordStat(w.id).wrong} 次）</div>
+          </div>
+          <button class="audio-btn" onclick="speakJapanese('${w.kana}', 0.9)" title="聽發音">🔊</button>
+        </div>
+      `).join("");
+    }
+    showView("mistake-view");
+  }
+
+  function openVocabList() {
+    document.getElementById("vocab-search").value = "";
+    renderVocabList();
+    showView("vocab-view");
+  }
+
+  function renderVocabList() {
+    const kw = document.getElementById("vocab-search").value.trim().toLowerCase();
+    const filtered = kw
+      ? vocabData.filter(w => w.kana.includes(kw) || w.kanji.includes(kw) || w.zh.includes(kw))
+      : vocabData;
+
+    const container = document.getElementById("vocab-list-container");
+    container.innerHTML = filtered.slice(0, 200).map(w => {
+      const s = getWordStat(w.id);
+      const statusText = s.wrong > 0 ? `<span style="color:var(--danger);">錯題 (${s.wrong}次)</span>` : (s.seen > 0 ? `<span style="color:var(--success);">已練 ${s.seen} 次</span>` : `未練習`);
+      return `
+        <div class="mistake-item">
+          <div>
+            <strong>${w.kana}</strong> ${w.kanji ? `<span style="color:var(--primary);">[${w.kanji}]</span>` : ""}
+            <span style="color:var(--muted); font-size:0.85rem; margin-left:6px;">${w.zh}</span>
+            <div style="font-size:0.78rem; color:var(--muted); margin-top:2px;">${w.pos} ｜ 狀態：${statusText}</div>
+          </div>
+          <button class="audio-btn" onclick="speakJapanese('${w.kana}', 0.9)">🔊</button>
+        </div>
+      `;
+    }).join("") + (filtered.length > 200 ? `<p style="text-align:center; color:var(--muted); padding:12px;">僅顯示前 200 筆，請使用上方搜尋框篩選</p>` : "");
+  }
+
+  function clearAllMistakes() {
+    if (!confirm("確定要清空所有錯題記錄嗎？")) return;
+    Object.keys(progress).forEach(id => { progress[id].wrong = 0; });
+    saveProgress();
+    openMistakeBook();
+  }
+
+  function resetAllProgress() {
+    if (!confirm("警告：這將會清除所有已練習次數與錯題紀錄，確定要重置嗎？")) return;
+    progress = {};
+    saveProgress();
+    openMistakeBook();
+  }
+
+  function showView(viewId) {
+    ["home-view", "quiz-view", "result-view", "mistake-view", "vocab-view"].forEach(id => {
+      document.getElementById(id).classList.add("hidden");
+    });
+    document.getElementById(viewId).classList.remove("hidden");
+    updateStatsUI();
+  }
+
+  function goHome() {
+    window.speechSynthesis.cancel();
+    showView("home-view");
+  }
+
+  updateStatsUI();
+</script>
+</body>
+</html>
