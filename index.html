@@ -1,163 +1,151 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JLPT N5 核心單字特訓</title>
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JLPT N5 日文單字熟練度測驗（完整 748 題庫）</title>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
-    body {
-      font-family: 'Noto SansTC', sans-serif;
+    :root {
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --bg: #f8fafc;
+      --card: #ffffff;
+      --text: #1e293b;
+      --muted: #64748b;
+      --success: #16a34a;
+      --danger: #dc2626;
+      --border: #e2e8f0;
     }
+    * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans TC", "Hiragino Sans", "Yu Gothic", sans-serif; }
+    body { background: var(--bg); color: var(--text); margin: 0; padding: 20px; display: flex; justify-content: center; min-height: 100vh; }
+    .container { width: 100%; max-width: 700px; background: var(--card); border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.06); padding: 28px; align-self: flex-start; }
+    h1 { margin: 0 0 8px; font-size: 1.5rem; text-align: center; }
+    .subtitle { text-align: center; color: var(--muted); font-size: 0.9rem; margin-bottom: 24px; }
+    .stats-bar { display: flex; justify-content: space-around; background: #f1f5f9; padding: 14px; border-radius: 12px; margin-bottom: 24px; font-size: 0.9rem; }
+    .stats-bar div { text-align: center; }
+    .stats-bar strong { display: block; font-size: 1.3rem; color: var(--primary); margin-bottom: 2px; }
+    .mode-grid { display: grid; gap: 12px; margin-bottom: 12px; }
+    .btn { background: var(--primary); color: #fff; border: none; padding: 15px 20px; border-radius: 10px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: 0.2s; width: 100%; }
+    .btn:hover { background: var(--primary-hover); }
+    .btn-outline { background: transparent; color: var(--primary); border: 2px solid var(--primary); }
+    .btn-outline:hover { background: #eef2ff; }
+    .btn-danger { background: var(--danger); }
+    .btn-danger:hover { background: #b91c1c; }
+    .btn-sm { padding: 8px 14px; font-size: 0.85rem; width: auto; }
+    .hidden { display: none !important; }
+
+    /* 測驗區 */
+    .quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; font-size: 0.9rem; color: var(--muted); gap: 8px; }
+    .badge { padding: 4px 10px; border-radius: 99px; font-size: 0.75rem; font-weight: 600; }
+    .badge-review { background: #fee2e2; color: var(--danger); }
+    .badge-new { background: #e0e7ff; color: var(--primary); }
+    .badge-mastered { background: #dcfce7; color: var(--success); }
+    .question-box { text-align: center; padding: 32px 16px; background: #f8fafc; border-radius: 12px; margin-bottom: 20px; border: 1px solid var(--border); }
+    .question-text { font-size: 2rem; font-weight: 700; margin: 0; line-height: 1.4; }
+    .pos-tag { display: inline-block; background: #e2e8f0; color: #475569; font-size: 0.78rem; padding: 2px 8px; border-radius: 6px; margin-top: 8px; }
+    .options-grid { display: grid; gap: 12px; }
+    .option-btn { background: #fff; border: 2px solid var(--border); padding: 14px 18px; border-radius: 10px; font-size: 1.1rem; text-align: left; cursor: pointer; transition: 0.15s; color: var(--text); }
+    .option-btn:hover:not(:disabled) { border-color: var(--primary); background: #f5f3ff; }
+    .option-btn.correct { background: #dcfce7; border-color: var(--success); color: #14532d; font-weight: 600; }
+    .option-btn.wrong { background: #fee2e2; border-color: var(--danger); color: #7f1d1d; }
+    .feedback { margin-top: 16px; padding: 14px; border-radius: 8px; text-align: center; font-weight: 600; line-height: 1.5; }
+
+    /* 錯題本與題庫總覽 */
+    .mistake-list { max-height: 440px; overflow-y: auto; border: 1px solid var(--border); border-radius: 10px; margin-bottom: 16px; }
+    .mistake-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; border-bottom: 1px solid var(--border); }
+    .mistake-item:last-child { border-bottom: none; }
+    .audio-btn { background: #e0e7ff; color: var(--primary); border: none; border-radius: 50%; width: 38px; height: 38px; font-size: 1.1rem; cursor: pointer; flex-shrink: 0; }
+    .audio-btn:hover { background: #c7d2fe; }
+    .search-input { width: 100%; padding: 10px 14px; border: 1px solid var(--border); border-radius: 8px; font-size: 0.95rem; margin-bottom: 12px; }
   </style>
 </head>
-<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col justify-between">
+<body>
+<div class="container">
+  <!-- 首頁選單 -->
+  <div id="home-view">
+    <h1>🇯🇵 JLPT N5 單字熟練度測驗</h1>
+    <p class="subtitle">收錄完整 748 個 N5 單字｜每次 20 題（前 5 題錯題複習 + 後 15 題平均新題）</p>
 
-  <!-- 頂部導航列 -->
-  <header class="bg-indigo-600 text-white shadow-md">
-    <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
-      <h1 class="text-xl font-bold tracking-wider flex items-center gap-2">
-        <span>🇯🇵</span> JLPT N5 核心單字特訓
-      </h1>
-      <div class="flex gap-2">
-        <button id="nav-home" onclick="switchView('home')" class="bg-indigo-700 hover:bg-indigo-800 px-3 py-1.5 rounded-lg text-sm transition font-medium">首頁</button>
-        <button id="nav-mistakes" onclick="switchView('mistakes')" class="bg-indigo-700 hover:bg-indigo-800 px-3 py-1.5 rounded-lg text-sm transition font-medium">錯題本 (<span id="mistake-count">0</span>)</button>
-        <button id="nav-vocab" onclick="switchView('vocab')" class="bg-indigo-700 hover:bg-indigo-800 px-3 py-1.5 rounded-lg text-sm transition font-medium">單字總覽</button>
-      </div>
+    <div class="stats-bar">
+      <div><strong id="stat-total">748</strong>總題庫數</div>
+      <div><strong id="stat-seen">0</strong>已練習過</div>
+      <div><strong id="stat-mistakes">0</strong>目前錯題</div>
     </div>
-  </header>
 
-  <!-- 主要內容區 -->
-  <main class="max-w-4xl mx-auto px-4 py-6 flex-grow w-full">
+    <div class="mode-grid">
+      <button class="btn" onclick="startQuiz('zh-to-kana')">模式一：看中文 ➔ 選日文平假名</button>
+      <button class="btn" onclick="startQuiz('kanji-to-kana')">模式二：看日文漢字 ➔ 選平假名（共 557 題）</button>
+      <button class="btn" onclick="startQuiz('audio-to-zh')">模式三：聽日文發音 ➔ 選正確中文</button>
+      <button class="btn btn-outline" onclick="openMistakeBook()">📖 查看錯誤記錄本 (<span id="btn-mistake-count">0</span>)</button>
+      <button class="btn btn-outline" style="border-color:#cbd5e1; color:#475569;" onclick="openVocabList()">📚 瀏覽完整單字庫與熟練度</button>
+    </div>
+  </div>
 
-    <!-- 1. 首頁選單視圖 -->
-    <div id="view-home" class="space-y-6">
-      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 text-center">
-        <h2 class="text-2xl font-bold text-slate-900 mb-2">挑戰 N5 滿分！</h2>
-        <p class="text-slate-500 text-sm mb-6">內含完整的 748 個核心單字，透過多種模式與錯題複習，穩固您的日文基礎。</p>
-        
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-left">
-          <button onclick="startQuiz('kanji-to-zh')" class="p-5 rounded-xl border-2 border-indigo-100 hover:border-indigo-500 hover:bg-indigo-50/50 transition group flex flex-col justify-between">
-            <div>
-              <div class="text-2xl mb-2">📖</div>
-              <h3 class="font-bold text-slate-800 group-hover:text-indigo-600 transition">模式一：看漢字選中文</h3>
-              <p class="text-xs text-slate-400 mt-1">測試漢字字義與假名對應</p>
-            </div>
-            <span class="mt-4 text-xs font-semibold text-indigo-600 flex items-center gap-1">開始測驗 &rarr;</span>
-          </button>
+  <!-- 測驗進行畫面 -->
+  <div id="quiz-view" class="hidden">
+    <div class="quiz-header">
+      <button class="btn btn-outline btn-sm" onclick="goHome()">← 返回主選單</button>
+      <span id="q-progress">第 1 / 20 題</span>
+      <span id="q-type-badge" class="badge badge-new">新單字</span>
+    </div>
 
-          <button onclick="startQuiz('zh-to-kana')" class="p-5 rounded-xl border-2 border-indigo-100 hover:border-indigo-500 hover:bg-indigo-50/50 transition group flex flex-col justify-between">
-            <div>
-              <div class="text-2xl mb-2">🇹🇼</div>
-              <h3 class="font-bold text-slate-800 group-hover:text-indigo-600 transition">模式二：看中文選假名</h3>
-              <p class="text-xs text-slate-400 mt-1">強化中文語意到發音的直覺</p>
-            </div>
-            <span class="mt-4 text-xs font-semibold text-indigo-600 flex items-center gap-1">開始測驗 &rarr;</span>
-          </button>
-
-          <button onclick="startQuiz('audio-to-zh')" class="p-5 rounded-xl border-2 border-indigo-100 hover:border-indigo-500 hover:bg-indigo-50/50 transition group flex flex-col justify-between">
-            <div>
-              <div class="text-2xl mb-2">🎧</div>
-              <h3 class="font-bold text-slate-800 group-hover:text-indigo-600 transition">模式三：聽發音選中文</h3>
-              <p class="text-xs text-slate-400 mt-1">訓練純日語聽力與反應力</p>
-            </div>
-            <span class="mt-4 text-xs font-semibold text-indigo-600 flex items-center gap-1">開始測驗 &rarr;</span>
-          </button>
-        </div>
-      </div>
-
-      <!-- 學習進度卡片 -->
-      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div>
-          <h3 class="font-bold text-slate-800">目前學習進度摘要</h3>
-          <p class="text-sm text-slate-500 mt-0.5">系統會自動記錄您答錯的單字並收入錯題本。</p>
-        </div>
-        <button onclick="resetProgress()" class="text-xs text-rose-500 hover:text-rose-700 underline font-medium">重置所有紀錄</button>
+    <div class="question-box">
+      <p id="q-prompt-label" style="color:var(--muted); font-size:0.85rem; margin:0 0 8px;"></p>
+      <div id="q-content" class="question-text"></div>
+      <div><span id="q-pos-tag" class="pos-tag"></span></div>
+      <div style="margin-top:14px; display:flex; justify-content:center; gap:8px;">
+        <button id="q-audio-btn" class="btn btn-outline btn-sm hidden" onclick="playCurrentAudio(0.9)">🔊 正常語速重聽</button>
+        <button id="q-audio-slow-btn" class="btn btn-outline btn-sm hidden" onclick="playCurrentAudio(0.65)">🐢 慢速重聽</button>
       </div>
     </div>
 
-    <!-- 2. 測驗執行視圖 -->
-    <div id="view-quiz" class="hidden space-y-6">
-      <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-        <!-- 頂部進度與分數 -->
-        <div class="flex justify-between items-center mb-6 text-sm text-slate-500 font-medium">
-          <span id="quiz-progress-text">題目 1 / 10</span>
-          <button onclick="switchView('home')" class="hover:text-slate-800 transition">放棄測驗</button>
-        </div>
+    <div id="options-container" class="options-grid"></div>
+    <div id="feedback-box" class="feedback hidden"></div>
+    <button id="next-btn" class="btn hidden" style="margin-top:16px;" onclick="nextQuestion()">下一題 ➔</button>
+  </div>
 
-        <!-- 提示文字 / 題目主體 -->
-        <div class="text-center py-6">
-          <p id="quiz-prompt-label" class="text-xs font-bold text-indigo-600 uppercase tracking-widest mb-2">請選擇正確的選項</p>
-          <div id="quiz-content" class="text-4xl font-extrabold text-slate-900 my-4 tracking-wide">--</div>
-          
-          <!-- 聽力模式專用按鈕 -->
-          <div id="audio-control-area" class="hidden flex justify-center gap-3 mt-4">
-            <button onclick="playCurrentAudio(0.9)" class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-medium shadow-sm transition flex items-center gap-2">
-              <span>🔊</span> 正常語速
-            </button>
-            <button onclick="playCurrentAudio(0.6)" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-4 py-2 rounded-xl text-sm font-medium transition flex items-center gap-2">
-              <span>🐢</span> 慢速發音
-            </button>
-          </div>
-        </div>
-
-        <!-- 選項列表 -->
-        <div id="options-container" class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-6">
-          <!-- 動態產生選項 -->
-        </div>
-      </div>
+  <!-- 測驗結算畫面 -->
+  <div id="result-view" class="hidden" style="text-align:center;">
+    <h2>🎉 測驗完成！</h2>
+    <p style="font-size:1.2rem;">本次得分：<strong id="final-score" style="color:var(--primary); font-size:1.8rem;">0</strong> / 20</p>
+    <p id="result-summary" style="color:var(--muted); margin-bottom:24px;"></p>
+    <div style="display:grid; gap:10px;">
+      <button class="btn" onclick="startQuiz(currentMode)">再測驗一輪（同模式）</button>
+      <button class="btn btn-outline" onclick="goHome()">返回主選單</button>
     </div>
+  </div>
 
-    <!-- 3. 測驗結算視圖 -->
-    <div id="view-result" class="hidden space-y-6">
-      <div class="bg-white p-8 rounded-2xl shadow-sm border border-slate-100 text-center space-y-4">
-        <div class="text-5xl mb-2">🎉</div>
-        <h2 class="text-2xl font-bold text-slate-900">測驗完成！</h2>
-        <p class="text-slate-600">本次答對題數：<span id="result-score" class="font-bold text-indigo-600 text-xl">0</span> / <span id="result-total">0</span></p>
-        <div class="pt-4 flex justify-center gap-3">
-          <button onclick="switchView('home')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-xl font-medium transition shadow-sm">返回首頁</button>
-        </div>
-      </div>
+  <!-- 錯題記錄本畫面 -->
+  <div id="mistake-view" class="hidden">
+    <div class="quiz-header">
+      <button class="btn btn-outline btn-sm" onclick="goHome()">← 返回主選單</button>
+      <strong>錯誤記錄本</strong>
+      <button class="btn btn-danger btn-sm" onclick="clearAllMistakes()">清空錯題</button>
     </div>
-
-    <!-- 4. 錯題本視圖 -->
-    <div id="view-mistakes" class="hidden space-y-4">
-      <div class="flex justify-between items-center">
-        <h2 class="text-lg font-bold text-slate-900">錯題複習本</h2>
-        <button onclick="clearMistakes()" class="text-xs text-rose-500 hover:text-rose-700 font-medium">清空錯題本</button>
-      </div>
-      <div id="mistakes-list" class="space-y-3">
-        <!-- 動態產生 -->
-      </div>
+    <div id="mistake-list-container" class="mistake-list"></div>
+    <div style="text-align:right;">
+      <button class="btn btn-outline btn-sm" style="color:var(--danger); border-color:var(--danger);" onclick="resetAllProgress()">重置所有學習紀錄</button>
     </div>
+  </div>
 
-    <!-- 5. 單字總覽視圖 -->
-    <div id="view-vocab" class="hidden space-y-4">
-      <div class="flex flex-col sm:flex-row justify-between gap-3">
-        <h2 class="text-lg font-bold text-slate-900">N5 核心單字總覽 (748字)</h2>
-        <input type="text" id="vocab-search" placeholder="搜尋漢字、假名或中文..." oninput="filterVocabList()" class="px-4 py-2 text-sm border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full sm:w-64">
-      </div>
-      <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-        <div class="max-h-[600px] overflow-y-auto divide-y divide-slate-100" id="vocab-table-body">
-          <!-- 動態產生 -->
-        </div>
-      </div>
+  <!-- 完整單字庫檢視畫面 -->
+  <div id="vocab-view" class="hidden">
+    <div class="quiz-header">
+      <button class="btn btn-outline btn-sm" onclick="goHome()">← 返回主選單</button>
+      <strong>完整單字庫（748 單字）</strong>
+      <span></span>
     </div>
+    <input type="text" id="vocab-search" class="search-input" placeholder="搜尋假名、漢字或中文意思..." oninput="renderVocabList()" />
+    <div id="vocab-list-container" class="mistake-list"></div>
+  </div>
+</div>
 
-  </main>
-
-  <!-- 底部版權 -->
-  <footer class="text-center py-6 text-xs text-slate-400">
-    JLPT N5 Vocabulary Practice &copy; 2026
-  </footer>
-
-  <!-- JavaScript 邏輯 -->
-  <script>
-    // 完整 JLPT N5 748 單字資料集
-    const n5VocabData = [
-      {"id": 1, "kana": "DVD", "kanji": "", "pos": "名詞", "zh": "DVD"},
+<script>
+  // ==========================================
+  // 1. 完整 748 個 JLPT N5 單字題庫
+  // ==========================================
+  const vocabData = [
+    {"id": 1, "kana": "DVD", "kanji": "", "pos": "名詞", "zh": "DVD"},
     {"id": 2, "kana": "ああ", "kanji": "", "pos": "感嘆詞", "zh": "啊"},
     {"id": 3, "kana": "あいだ", "kanji": "間", "pos": "名詞", "zh": "之間"},
     {"id": 4, "kana": "あう", "kanji": "会う", "pos": "動詞", "zh": "見面"},
@@ -905,279 +893,380 @@
     {"id": 746, "kana": "わたる", "kanji": "渡る", "pos": "動詞", "zh": "渡過、穿越"},
     {"id": 747, "kana": "わるい", "kanji": "悪い", "pos": "い形容詞", "zh": "壞的"},
     {"id": 748, "kana": "を", "kanji": "", "pos": "助詞", "zh": "（受詞助詞）"}
-    ];
+  ];
 
-    // 若需載入完整 748 單字，可在此擴充或直接對應完整資料陣列。為確保前端高效，此處已備好核心互動架構。
-    // 補齊一些常見測試單字確保系統豐富度
-    for (let i = 51; i <= 748; i++) {
-      n5VocabData.push({
-        id: i,
-        kanji: `單字${i}`,
-        kana: `たんご${i}`,
-        zh: `N5核心字彙含義 ${i}`
-      });
+  // ==========================================
+  // 2. 狀態管理與 localStorage 持久化
+  // ==========================================
+  const STORAGE_KEY = "jlpt_n5_quiz_progress_v1";
+  let progress = JSON.parse(localStorage.getItem(STORAGE_KEY) || "{}");
+
+  function saveProgress() {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+    updateStatsUI();
+  }
+
+  function getWordStat(id) {
+    if (!progress[id]) progress[id] = { seen: 0, wrong: 0 };
+    return progress[id];
+  }
+
+  function updateStatsUI() {
+    const total = vocabData.length;
+    let seenCount = 0;
+    let mistakeCount = 0;
+    vocabData.forEach(w => {
+      const s = getWordStat(w.id);
+      if (s.seen > 0) seenCount++;
+      if (s.wrong > 0) mistakeCount++;
+    });
+    document.getElementById("stat-total").textContent = total;
+    document.getElementById("stat-seen").textContent = seenCount;
+    document.getElementById("stat-mistakes").textContent = mistakeCount;
+    document.getElementById("btn-mistake-count").textContent = mistakeCount;
+  }
+
+  // ==========================================
+  // 3. 智慧出題演算法 (前5錯題 + 後15新題/平均題)
+  // ==========================================
+  let currentMode = "";
+  let quizQueue = [];
+  let currentIndex = 0;
+  let score = 0;
+
+  function shuffle(arr) {
+    const copy = [...arr];
+    for (let i = copy.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [copy[i], copy[j]] = [copy[j], copy[i]];
+    }
+    return copy;
+  }
+
+  function startQuiz(mode) {
+    currentMode = mode;
+    currentIndex = 0;
+    score = 0;
+
+    // 模式二僅挑選含有漢字的單字
+    const pool = mode === "kanji-to-kana"
+      ? vocabData.filter(w => w.kanji && w.kanji.trim() !== "")
+      : [...vocabData];
+
+    // 1. 前 5 題：從過去做錯的題目 (wrong > 0) 中隨機抽取最多 5 題
+    const mistakePool = shuffle(pool.filter(w => getWordStat(w.id).wrong > 0));
+    const selectedMistakes = mistakePool.slice(0, 5).map(w => ({ ...w, qType: "review" }));
+    const selectedIds = new Set(selectedMistakes.map(w => w.id));
+
+    // 2. 後 15 題（若錯題不足 5 題則自動補滿至 20 題）：
+    const neededCount = 20 - selectedMistakes.length;
+    const remainingPool = pool.filter(w => !selectedIds.has(w.id));
+
+    // 優先從「完全沒做過的新單字 (seen === 0)」中隨機抽取
+    const unseenPool = shuffle(remainingPool.filter(w => getWordStat(w.id).seen === 0));
+    let selectedOthers = unseenPool.slice(0, neededCount).map(w => ({ ...w, qType: "new" }));
+
+    // 當所有新單字都做完後，才從「過去做過但目前無錯誤」的題目中，依出現次數 (seen) 由少到多平均挑選
+    if (selectedOthers.length < neededCount) {
+      const otherIds = new Set(selectedOthers.map(w => w.id));
+      const seenNoMistakePool = shuffle(remainingPool.filter(w => !otherIds.has(w.id)))
+        .sort((a, b) => getWordStat(a.id).seen - getWordStat(b.id).seen);
+      const extra = seenNoMistakePool
+        .slice(0, neededCount - selectedOthers.length)
+        .map(w => ({ ...w, qType: "mastered" }));
+      selectedOthers = selectedOthers.concat(extra);
     }
 
-    let mistakes = JSON.parse(localStorage.getItem('n5_mistakes')) || [];
-    let currentQuizList = [];
-    let currentQuestionIndex = 0;
-    let score = 0;
-    let currentMode = '';
-    let currentQuestionData = null;
+    quizQueue = [...selectedMistakes, ...selectedOthers];
 
-    // 初始化介面
-    updateMistakeCount();
-    renderVocabTable(n5VocabData);
+    showView("quiz-view");
+    renderQuestion();
+  }
 
-    function switchView(viewName) {
-      document.getElementById('view-home').classList.add('hidden');
-      document.getElementById('view-quiz').classList.add('hidden');
-      document.getElementById('view-result').classList.add('hidden');
-      document.getElementById('view-mistakes').classList.add('hidden');
-      document.getElementById('view-vocab').classList.add('hidden');
+  // ==========================================
+  // 4. 渲染題目與日文語音合成 (優化語音包挑選)
+  // ==========================================
+  function getJapaneseVoice() {
+    if (!("speechSynthesis" in window)) return null;
+    const voices = window.speechSynthesis.getVoices();
+    const jaVoices = voices.filter(v => v.lang === "ja-JP" || v.lang.startsWith("ja"));
+    if (jaVoices.length === 0) return null;
 
-      if (viewName === 'home') document.getElementById('view-home').classList.remove('hidden');
-      if (viewName === 'quiz') document.getElementById('view-quiz').classList.remove('hidden');
-      if (viewName === 'result') document.getElementById('view-result').classList.remove('hidden');
-      if (viewName === 'mistakes') {
-        document.getElementById('view-mistakes').classList.remove('hidden');
-        renderMistakesList();
-      }
-      if (viewName === 'vocab') document.getElementById('view-vocab').classList.remove('hidden');
+    // 優先挑選 Google 網路語音、Microsoft Natural（微軟自然語音）或 Apple 內建好聽的日文語音
+    const preferred = jaVoices.find(v => 
+      v.name.includes("Google") || 
+      v.name.includes("Natural") || 
+      v.name.includes("Kyoko") || 
+      v.name.includes("Otoya") ||
+      v.name.includes("Microsoft")
+    );
+    return preferred || jaVoices[0];
+  }
+
+  function speakJapanese(text, rate = 0.9) {
+    if (!("speechSynthesis" in window)) return;
+    window.speechSynthesis.cancel();
+    
+    const utter = new SpeechSynthesisUtterance(text);
+    utter.lang = "ja-JP";
+    utter.rate = rate;
+    
+    const bestVoice = getJapaneseVoice();
+    if (bestVoice) {
+      utter.voice = bestVoice;
     }
 
-    // 啟動測驗
-    function startQuiz(mode) {
-      currentMode = mode;
-      currentQuizList = [...n5VocabData].sort(() => 0.5 - Math.random()).slice(0, 10);
-      currentQuestionIndex = 0;
-      score = 0;
-      switchView('quiz');
-      loadQuestion();
+    window.speechSynthesis.speak(utter);
+  }
+
+  if ("speechSynthesis" in window) {
+    window.speechSynthesis.onvoiceschanged = () => {
+      getJapaneseVoice();
+    };
+  }
+
+  function playCurrentAudio(rate = 0.9) {
+    const q = quizQueue[currentIndex];
+    speakJapanese(q.kana, rate);
+  }
+
+  function renderQuestion() {
+    const q = quizQueue[currentIndex];
+    document.getElementById("q-progress").textContent = `第 ${currentIndex + 1} / ${quizQueue.length} 題`;
+
+    const badge = document.getElementById("q-type-badge");
+    if (q.qType === "review") {
+      badge.textContent = "錯題複習";
+      badge.className = "badge badge-review";
+    } else if (q.qType === "new") {
+      badge.textContent = "新單字";
+      badge.className = "badge badge-new";
+    } else {
+      badge.textContent = "已熟練循環";
+      badge.className = "badge badge-mastered";
     }
 
-    // 載入題目
-    function loadQuestion() {
-      if (currentQuestionIndex >= currentQuizList.length) {
-        showResult();
-        return;
-      }
+    const promptLabel = document.getElementById("q-prompt-label");
+    const qContent = document.getElementById("q-content");
+    const posTag = document.getElementById("q-pos-tag");
+    const audioBtn = document.getElementById("q-audio-btn");
+    const slowBtn = document.getElementById("q-audio-slow-btn");
 
-      const q = currentQuizList[currentQuestionIndex];
-      currentQuestionData = q;
-      document.getElementById('quiz-progress-text').textContent = `題目 ${currentQuestionIndex + 1} / ${currentQuizList.length}`;
-      
-      const promptLabel = document.getElementById('quiz-prompt-label');
-      const qContent = document.getElementById('quiz-content');
-      const audioArea = document.getElementById('audio-control-area');
-      audioArea.classList.add('hidden');
+    audioBtn.classList.add("hidden");
+    slowBtn.classList.add("hidden");
+    posTag.textContent = q.pos;
 
-      let correctAnswer = '';
-      let optionsType = '';
-
-      if (currentMode === 'kanji-to-zh') {
-        promptLabel.textContent = "請選擇正確的中文意思：";
-        qContent.textContent = `${q.kanji} (${q.kana})`;
-        correctAnswer = q.zh;
-        optionsType = 'zh';
-      } else if (currentMode === 'zh-to-kana') {
-        promptLabel.textContent = "請選擇正確的假名：";
-        qContent.textContent = q.zh;
-        correctAnswer = q.kana;
-        optionsType = 'kana';
-      } else if (currentMode === 'audio-to-zh') {
-        promptLabel.textContent = "請點擊下方按鈕聆聽發音，並選出正確中文：";
-        qContent.textContent = "🎧 點擊下方按鈕聽發音";
-        correctAnswer = q.zh;
-        optionsType = 'zh';
-        audioArea.classList.remove('hidden');
-        // 自動播放一次（若被瀏覽器攔截則使用者手動點擊按鈕）
-        playCurrentAudio(0.9);
-      }
-
-      // 產生選項
-      generateOptions(correctAnswer, optionsType);
+    if (currentMode === "zh-to-kana") {
+      promptLabel.textContent = "請選出對應的日文假名：";
+      qContent.textContent = q.zh;
+    } else if (currentMode === "kanji-to-kana") {
+      promptLabel.textContent = "請選出此日文漢字的正確讀音（假名）：";
+      qContent.textContent = q.kanji;
+    } else if (currentMode === "audio-to-zh") {
+      promptLabel.textContent = "請聆聽發音並選出正確的中文意思：";
+      qContent.textContent = "🎧 請聽發音作答";
+      audioBtn.classList.remove("hidden");
+      slowBtn.classList.remove("hidden");
+      speakJapanese(q.kana, 0.9);
     }
 
-    // 產生 4 個選項
-    function generateOptions(correctAnswer, type) {
-      const container = document.getElementById('options-container');
-      container.innerHTML = '';
+    // 產生 4 個不重複的選項（避免同假名或同中文干擾項造成多解）
+    let candidateDistractors = [];
+    if (currentMode === "kanji-to-kana") {
+      // 模式二專用：依送り仮名（字尾平假名）、詞性、音節長度與字首字尾相似度加權排序，打造高鑑別度誘答選項
+      const okuriMatch = q.kanji.match(/[ぁ-ん]+$/);
+      const qOkuri = okuriMatch ? okuriMatch[0] : "";
+      const qFirst = q.kana[0] || "";
+      const qLast = q.kana[q.kana.length - 1] || "";
 
-      let wrongPool = n5VocabData.filter(item => {
-        let val = (type === 'zh') ? item.zh : item.kana;
-        return val !== correctAnswer;
-      });
+      const scored = vocabData
+        .filter(w => w.id !== q.id && w.kana !== q.kana && w.zh !== q.zh)
+        .map(w => {
+          let score = 0;
+          // 1. 最高權重：擁有完全相同的送り仮名（例如「新しい」配「忙しい」「楽しい」，或「開ける」配「閉める」「教える」）
+          if (qOkuri && w.kana.endsWith(qOkuri)) score += 50;
+          // 2. 無送り仮名的名詞/純漢字詞，優先挑選同樣有漢字且字尾假名相同的單字（防止單憑純假名長相排除）
+          if (!qOkuri && w.kanji && w.kanji.trim() !== "") score += 25;
+          // 3. 相同詞性（動詞配動詞、い形容詞配い形容詞、名詞配名詞）
+          if (w.pos === q.pos) score += 20;
+          // 4. 字尾假名相同（例如都是い結尾、る結尾、う段結尾、ん結尾）
+          if (w.kana[w.kana.length - 1] === qLast) score += 15;
+          // 5. 字首假名相同（頭韻干擾，例如「あつい」配「あまい」「あおい」）
+          if (w.kana[0] === qFirst) score += 12;
+          // 6. 假名字數長度越接近分數越高（避免一眼看出長短差異）
+          const lenDiff = Math.abs(w.kana.length - q.kana.length);
+          score += Math.max(0, 12 - lenDiff * 4);
+          // 加入微幅隨機擾動，確保同分單字每次出現的誘答組合有變化
+          score += Math.random() * 6;
+          return { word: w, score };
+        })
+        .sort((a, b) => b.score - a.score);
 
-      wrongPool.sort(() => 0.5 - Math.random());
-      let options = [correctAnswer];
-      for (let i = 0; i < 3 && i < wrongPool.length; i++) {
-        options.push(type === 'zh' ? wrongPool[i].zh : wrongPool[i].kana);
-      }
-      options.sort(() => 0.5 - Math.random());
-
-      options.forEach(opt => {
-        const btn = document.createElement('button');
-        btn.className = "p-4 text-left font-medium bg-slate-50 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-300 rounded-xl transition text-slate-700";
-        btn.textContent = opt;
-        btn.onclick = () => checkAnswer(opt, correctAnswer, btn);
-        container.appendChild(btn);
-      });
-    }
-
-    // 檢查答案
-    function checkAnswer(selected, correct, btnElement) {
-      const buttons = document.querySelectorAll('#options-container button');
-      buttons.forEach(b => b.disabled = true);
-
-      if (selected === correct) {
-        btnElement.classList.remove('bg-slate-50', 'border-slate-200');
-        btnElement.classList.add('bg-emerald-50', 'border-emerald-500', 'text-emerald-700');
-        score++;
-      } else {
-        btnElement.classList.remove('bg-slate-50', 'border-slate-200');
-        btnElement.classList.add('bg-rose-50', 'border-rose-500', 'text-rose-700');
-        
-        // 標記正確答案
-        buttons.forEach(b => {
-          if (b.textContent === correct) {
-            b.classList.add('bg-emerald-50', 'border-emerald-500', 'text-emerald-700');
-          }
-        });
-
-        // 加入錯題本
-        addMistake(currentQuestionData);
-      }
-
-      setTimeout(() => {
-        currentQuestionIndex++;
-        loadQuestion();
-      }, 1000);
-    }
-
-    // 顯示結算
-    function showResult() {
-      switchView('result');
-      document.getElementById('result-score').textContent = score;
-      document.getElementById('result-total').textContent = currentQuizList.length;
-    }
-
-    // 錯題管理
-    function addMistake(item) {
-      if (!mistakes.some(m => m.id === item.id)) {
-        mistakes.push(item);
-        localStorage.setItem('n5_mistakes', JSON.stringify(mistakes));
-        updateMistakeCount();
-      }
-    }
-
-    function updateMistakeCount() {
-      document.getElementById('mistake-count').textContent = mistakes.length;
-    }
-
-    function renderMistakesList() {
-      const container = document.getElementById('mistakes-list');
-      container.innerHTML = '';
-      if (mistakes.length === 0) {
-        container.innerHTML = `<div class="bg-white p-6 rounded-2xl text-center text-slate-400 text-sm border border-slate-100">目前沒有錯題記錄，表現太棒了！</div>`;
-        return;
-      }
-      mistakes.forEach(m => {
-        const div = document.createElement('div');
-        div.className = "bg-white p-4 rounded-xl border border-slate-100 flex justify-between items-center";
-        div.innerHTML = `
-          <div>
-            <span class="font-bold text-slate-900 text-lg mr-2">${m.kanji}</span>
-            <span class="text-indigo-600 text-sm mr-2">[${m.kana}]</span>
-            <span class="text-slate-500 text-sm">${m.zh}</span>
-          </div>
-          <button onclick="playJapanese('${m.kana}', 0.9)" class="bg-slate-100 hover:bg-slate-200 p-2 rounded-lg text-sm">🔊 發音</button>
-        `;
-        container.appendChild(div);
-      });
-    }
-
-    function clearMistakes() {
-      mistakes = [];
-      localStorage.removeItem('n5_mistakes');
-      updateMistakeCount();
-      renderMistakesList();
-    }
-
-    // 總覽單字列表與搜尋
-    function renderVocabTable(data) {
-      const tbody = document.getElementById('vocab-table-body');
-      tbody.innerHTML = '';
-      data.forEach(item => {
-        const row = document.createElement('div');
-        row.className = "p-4 flex items-center justify-between hover:bg-slate-50 transition";
-        row.innerHTML = `
-          <div class="flex items-center gap-4">
-            <span class="w-12 text-xs text-slate-400">#${item.id}</span>
-            <span class="font-bold text-slate-900 w-24">${item.kanji}</span>
-            <span class="text-indigo-600 w-28 text-sm">${item.kana}</span>
-            <span class="text-slate-600 text-sm">${item.zh}</span>
-          </div>
-          <button onclick="playJapanese('${item.kana}', 0.9)" class="bg-slate-100 hover:bg-slate-200 p-2 rounded-lg text-xs font-medium">🔊 試聽</button>
-        `;
-        tbody.appendChild(row);
-      });
-    }
-
-    function filterVocabList() {
-      const keyword = document.getElementById('vocab-search').value.toLowerCase();
-      const filtered = n5VocabData.filter(item => 
-        item.kanji.toLowerCase().includes(keyword) || 
-        item.kana.toLowerCase().includes(keyword) || 
-        item.zh.toLowerCase().includes(keyword)
+      candidateDistractors = scored.map(s => s.word);
+    } else {
+      candidateDistractors = shuffle(
+        vocabData.filter(w => w.id !== q.id && w.kana !== q.kana && w.zh !== q.zh)
       );
-      renderVocabTable(filtered);
     }
 
-    function resetProgress() {
-      if (confirm("確定要重置所有紀錄與錯題本嗎？")) {
-        clearMistakes();
-        alert("已重置完成！");
+    const uniqueDistractors = [];
+    const usedTexts = new Set([currentMode === "audio-to-zh" ? q.zh : q.kana]);
+
+    for (const item of candidateDistractors) {
+      const label = currentMode === "audio-to-zh" ? item.zh : item.kana;
+      if (!usedTexts.has(label)) {
+        usedTexts.add(label);
+        uniqueDistractors.push(item);
       }
+      if (uniqueDistractors.length === 3) break;
     }
 
-    // ==========================================
-    // 專為 iPhone (iOS) 完美優化的發音核心 (100% 聽得到聲音)
-    // ==========================================
-    function playCurrentAudio(rate) {
-      if (currentQuestionData && currentQuestionData.kana) {
-        playJapanese(currentQuestionData.kana, rate);
-      }
+    const options = shuffle([q, ...uniqueDistractors]);
+    const optionsContainer = document.getElementById("options-container");
+    optionsContainer.innerHTML = "";
+
+    options.forEach(opt => {
+      const btn = document.createElement("button");
+      btn.className = "option-btn";
+      btn.textContent = currentMode === "audio-to-zh" ? opt.zh : opt.kana;
+      btn.onclick = () => handleAnswer(btn, opt.id === q.id, q);
+      optionsContainer.appendChild(btn);
+    });
+
+    document.getElementById("feedback-box").classList.add("hidden");
+    document.getElementById("next-btn").classList.add("hidden");
+  }
+
+  function handleAnswer(selectedBtn, isCorrect, questionWord) {
+    const allBtns = document.querySelectorAll(".option-btn");
+    allBtns.forEach(b => b.disabled = true);
+
+    const stat = getWordStat(questionWord.id);
+    stat.seen += 1;
+
+    const feedbackBox = document.getElementById("feedback-box");
+    feedbackBox.classList.remove("hidden");
+
+    const wordDisplay = `${questionWord.kana}${questionWord.kanji ? `（${questionWord.kanji}）` : ""} [${questionWord.pos}] ：${questionWord.zh}`;
+
+    if (isCorrect) {
+      selectedBtn.classList.add("correct");
+      score++;
+      // 若為錯題複習且答對，從錯題狀態移除
+      if (stat.wrong > 0) stat.wrong = 0;
+      feedbackBox.style.background = "#dcfce7";
+      feedbackBox.style.color = "#14532d";
+      feedbackBox.textContent = `⭕ 答對了！ ${wordDisplay}`;
+    } else {
+      selectedBtn.classList.add("wrong");
+      stat.wrong += 1;
+      const correctText = currentMode === "audio-to-zh" ? questionWord.zh : questionWord.kana;
+      allBtns.forEach(b => {
+        if (b.textContent === correctText) b.classList.add("correct");
+      });
+      feedbackBox.style.background = "#fee2e2";
+      feedbackBox.style.color = "#7f1d1d";
+      feedbackBox.textContent = `❌ 答錯了（已加入錯題本）！正解：${wordDisplay}`;
     }
 
-    function playJapanese(text, rate) {
-      if (!("speechSynthesis" in window)) {
-        console.warn("此瀏覽器不支援語音合成");
-        return;
-      }
+    speakJapanese(questionWord.kana, 0.9);
+    saveProgress();
+    document.getElementById("next-btn").classList.remove("hidden");
+  }
 
-      window.speechSynthesis.cancel();
-
-      const utter = new SpeechSynthesisUtterance(text);
-      utter.lang = "ja-JP";
-      utter.rate = rate;
-
-      // 自動抓取 iOS/Android 內建最自然的日文語音引擎
-      const voices = window.speechSynthesis.getVoices();
-      const jaVoice = voices.find(v => v.lang === "ja-JP" && (v.name.includes("Kyoko") || v.name.includes("Otoha") || v.name.includes("Natural") || v.default));
-      if (jaVoice) {
-        utter.voice = jaVoice;
-      }
-
-      window.speechSynthesis.speak(utter);
+  function nextQuestion() {
+    currentIndex++;
+    if (currentIndex < quizQueue.length) {
+      renderQuestion();
+    } else {
+      document.getElementById("final-score").textContent = score;
+      document.getElementById("result-summary").textContent = `本輪答對 ${score} 題，答錯 ${quizQueue.length - score} 題。錯題已自動收錄至錯題記錄本，下次測驗前 5 題將優先複習。`;
+      showView("result-view");
     }
+  }
 
-    // 確保頁面載入時預先載入語音清單
-    if ("speechSynthesis" in window) {
-      window.speechSynthesis.onvoiceschanged = () => {
-        window.speechSynthesis.getVoices();
-      };
+  // ==========================================
+  // 5. 錯題記錄本與完整單字庫
+  // ==========================================
+  function openMistakeBook() {
+    const container = document.getElementById("mistake-list-container");
+    const mistakes = vocabData.filter(w => getWordStat(w.id).wrong > 0);
+
+    if (mistakes.length === 0) {
+      container.innerHTML = `<p style="text-align:center; color:var(--muted); padding:28px;">目前沒有錯題，繼續保持！🎉</p>`;
+    } else {
+      container.innerHTML = mistakes.map(w => `
+        <div class="mistake-item">
+          <div>
+            <strong style="font-size:1.1rem;">${w.kana}</strong>
+            ${w.kanji ? `<span style="color:var(--primary); margin-left:6px; font-weight:600;">[${w.kanji}]</span>` : ""}
+            <span class="pos-tag" style="margin-left:6px;">${w.pos}</span>
+            <div style="color:var(--muted); font-size:0.9rem; margin-top:4px;">${w.zh}（累計錯誤 ${getWordStat(w.id).wrong} 次）</div>
+          </div>
+          <button class="audio-btn" onclick="speakJapanese('${w.kana}', 0.9)" title="聽發音">🔊</button>
+        </div>
+      `).join("");
     }
-  </script>
+    showView("mistake-view");
+  }
+
+  function openVocabList() {
+    document.getElementById("vocab-search").value = "";
+    renderVocabList();
+    showView("vocab-view");
+  }
+
+  function renderVocabList() {
+    const kw = document.getElementById("vocab-search").value.trim().toLowerCase();
+    const filtered = kw
+      ? vocabData.filter(w => w.kana.includes(kw) || w.kanji.includes(kw) || w.zh.includes(kw))
+      : vocabData;
+
+    const container = document.getElementById("vocab-list-container");
+    container.innerHTML = filtered.slice(0, 200).map(w => {
+      const s = getWordStat(w.id);
+      const statusText = s.wrong > 0 ? `<span style="color:var(--danger);">錯題 (${s.wrong}次)</span>` : (s.seen > 0 ? `<span style="color:var(--success);">已練 ${s.seen} 次</span>` : `未練習`);
+      return `
+        <div class="mistake-item">
+          <div>
+            <strong>${w.kana}</strong> ${w.kanji ? `<span style="color:var(--primary);">[${w.kanji}]</span>` : ""}
+            <span style="color:var(--muted); font-size:0.85rem; margin-left:6px;">${w.zh}</span>
+            <div style="font-size:0.78rem; color:var(--muted); margin-top:2px;">${w.pos} ｜ 狀態：${statusText}</div>
+          </div>
+          <button class="audio-btn" onclick="speakJapanese('${w.kana}', 0.9)">🔊</button>
+        </div>
+      `;
+    }).join("") + (filtered.length > 200 ? `<p style="text-align:center; color:var(--muted); padding:12px;">僅顯示前 200 筆，請使用上方搜尋框篩選</p>` : "");
+  }
+
+  function clearAllMistakes() {
+    if (!confirm("確定要清空所有錯題記錄嗎？")) return;
+    Object.keys(progress).forEach(id => { progress[id].wrong = 0; });
+    saveProgress();
+    openMistakeBook();
+  }
+
+  function resetAllProgress() {
+    if (!confirm("警告：這將會清除所有已練習次數與錯題紀錄，確定要重置嗎？")) return;
+    progress = {};
+    saveProgress();
+    openMistakeBook();
+  }
+
+  function showView(viewId) {
+    ["home-view", "quiz-view", "result-view", "mistake-view", "vocab-view"].forEach(id => {
+      document.getElementById(id).classList.add("hidden");
+    });
+    document.getElementById(viewId).classList.remove("hidden");
+    updateStatsUI();
+  }
+
+  function goHome() {
+    window.speechSynthesis.cancel();
+    showView("home-view");
+  }
+
+  updateStatsUI();
+</script>
 </body>
 </html>
