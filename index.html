@@ -984,33 +984,45 @@
   }
 
   // ==========================================
-  // 4. 渲染題目與線上真人 TTS 音訊串流
+  // 4. 渲染題目與日文語音合成 (優化語音包挑選)
   // ==========================================
-  function speakJapanese(text, rate = 0.9) {
-    const cleanText = encodeURIComponent(text);
-    const audioUrl = `https://translate.google.com/translate_tts?ie=UTF-8&q=${cleanText}&tl=ja&client=tw-ob`;
-    
-    // 如果有正在播放的聲音先停止
-    window.speechSynthesis.cancel();
-    
-    const audio = new Audio(audioUrl);
-    audio.playbackRate = rate; // 調整語速 (0.7 ~ 1.0)
-    audio.play().catch(error => {
-      console.warn("線上音訊播放失敗，改用內建語音備援", error);
-      fallbackSpeechSynthesis(text, rate);
-    });
+  function getJapaneseVoice() {
+    if (!("speechSynthesis" in window)) return null;
+    const voices = window.speechSynthesis.getVoices();
+    const jaVoices = voices.filter(v => v.lang === "ja-JP" || v.lang.startsWith("ja"));
+    if (jaVoices.length === 0) return null;
+
+    // 優先挑選 Google 網路語音、Microsoft Natural（微軟自然語音）或 Apple 內建好聽的日文語音
+    const preferred = jaVoices.find(v => 
+      v.name.includes("Google") || 
+      v.name.includes("Natural") || 
+      v.name.includes("Kyoko") || 
+      v.name.includes("Otoya") ||
+      v.name.includes("Microsoft")
+    );
+    return preferred || jaVoices[0];
   }
 
-  // 備援方案：瀏覽器內建語音（避免離線時完全沒聲音）
-  function fallbackSpeechSynthesis(text, rate) {
+  function speakJapanese(text, rate = 0.9) {
     if (!("speechSynthesis" in window)) return;
+    window.speechSynthesis.cancel();
+    
     const utter = new SpeechSynthesisUtterance(text);
     utter.lang = "ja-JP";
     utter.rate = rate;
-    const voices = window.speechSynthesis.getVoices();
-    const jaVoice = voices.find(v => v.lang === "ja-JP" || v.lang.startsWith("ja"));
-    if (jaVoice) utter.voice = jaVoice;
+    
+    const bestVoice = getJapaneseVoice();
+    if (bestVoice) {
+      utter.voice = bestVoice;
+    }
+
     window.speechSynthesis.speak(utter);
+  }
+
+  if ("speechSynthesis" in window) {
+    window.speechSynthesis.onvoiceschanged = () => {
+      getJapaneseVoice();
+    };
   }
 
   function playCurrentAudio(rate = 0.9) {
@@ -1071,13 +1083,20 @@
         .filter(w => w.id !== q.id && w.kana !== q.kana && w.zh !== q.zh)
         .map(w => {
           let score = 0;
+          // 1. 最高權重：擁有完全相同的送り仮名（例如「新しい」配「忙しい」「楽しい」，或「開ける」配「閉める」「教える」）
           if (qOkuri && w.kana.endsWith(qOkuri)) score += 50;
+          // 2. 無送り仮名的名詞/純漢字詞，優先挑選同樣有漢字且字尾假名相同的單字（防止單憑純假名長相排除）
           if (!qOkuri && w.kanji && w.kanji.trim() !== "") score += 25;
+          // 3. 相同詞性（動詞配動詞、い形容詞配い形容詞、名詞配名詞）
           if (w.pos === q.pos) score += 20;
+          // 4. 字尾假名相同（例如都是い結尾、る結尾、う段結尾、ん結尾）
           if (w.kana[w.kana.length - 1] === qLast) score += 15;
+          // 5. 字首假名相同（頭韻干擾，例如「あつい」配「あまい」「あおい」）
           if (w.kana[0] === qFirst) score += 12;
+          // 6. 假名字數長度越接近分數越高（避免一眼看出長短差異）
           const lenDiff = Math.abs(w.kana.length - q.kana.length);
           score += Math.max(0, 12 - lenDiff * 4);
+          // 加入微幅隨機擾動，確保同分單字每次出現的誘答組合有變化
           score += Math.random() * 6;
           return { word: w, score };
         })
@@ -1133,6 +1152,7 @@
     if (isCorrect) {
       selectedBtn.classList.add("correct");
       score++;
+      // 若為錯題複習且答對，從錯題狀態移除
       if (stat.wrong > 0) stat.wrong = 0;
       feedbackBox.style.background = "#dcfce7";
       feedbackBox.style.color = "#14532d";
