@@ -953,8 +953,9 @@
       ? vocabData.filter(w => w.kanji && w.kanji.trim() !== "")
       : [...vocabData];
 
-    // 1. 前 5 題：從過去做錯的題目 (wrong > 0) 中隨機抽取最多 5 題
-    const mistakePool = shuffle(pool.filter(w => getWordStat(w.id).wrong > 0));
+    // 1. 前 5 題：從過去累積做錯的題目 (wrong > 0) 中，依錯誤次數由高到低優先抽取最多 5 題
+    const mistakePool = shuffle(pool.filter(w => getWordStat(w.id).wrong > 0))
+      .sort((a, b) => getWordStat(b.id).wrong - getWordStat(a.id).wrong);
     const selectedMistakes = mistakePool.slice(0, 5).map(w => ({ ...w, qType: "review" }));
     const selectedIds = new Set(selectedMistakes.map(w => w.id));
 
@@ -1152,11 +1153,13 @@
     if (isCorrect) {
       selectedBtn.classList.add("correct");
       score++;
-      // 若為錯題複習且答對，從錯題狀態移除
-      if (stat.wrong > 0) stat.wrong = 0;
+      // 若為錯題複習且答對，累積錯誤次數減 1（需答對多次才能逐步消除多次累積的錯題）
+      if (stat.wrong > 0) stat.wrong = Math.max(0, stat.wrong - 1);
       feedbackBox.style.background = "#dcfce7";
       feedbackBox.style.color = "#14532d";
-      feedbackBox.textContent = `⭕ 答對了！ ${wordDisplay}`;
+      feedbackBox.textContent = stat.wrong > 0
+        ? `⭕ 答對了！（剩餘錯題權重：${stat.wrong} 次） ${wordDisplay}`
+        : `⭕ 答對了！ ${wordDisplay}`;
     } else {
       selectedBtn.classList.add("wrong");
       stat.wrong += 1;
@@ -1166,7 +1169,7 @@
       });
       feedbackBox.style.background = "#fee2e2";
       feedbackBox.style.color = "#7f1d1d";
-      feedbackBox.textContent = `❌ 答錯了（已加入錯題本）！正解：${wordDisplay}`;
+      feedbackBox.textContent = `❌ 答錯了（目前累計錯誤 ${stat.wrong} 次）！正解：${wordDisplay}`;
     }
 
     speakJapanese(questionWord.kana, 0.9);
@@ -1180,7 +1183,7 @@
       renderQuestion();
     } else {
       document.getElementById("final-score").textContent = score;
-      document.getElementById("result-summary").textContent = `本輪答對 ${score} 題，答錯 ${quizQueue.length - score} 題。錯題已自動收錄至錯題記錄本，下次測驗前 5 題將優先複習。`;
+      document.getElementById("result-summary").textContent = `本輪答對 ${score} 題，答錯 ${quizQueue.length - score} 題。錯題次數會跨輪次持續累積於錯題記錄本中（每次複習答對扣減 1 次錯誤權重），下次測驗前 5 題將優先出題複習。`;
       showView("result-view");
     }
   }
@@ -1190,7 +1193,9 @@
   // ==========================================
   function openMistakeBook() {
     const container = document.getElementById("mistake-list-container");
-    const mistakes = vocabData.filter(w => getWordStat(w.id).wrong > 0);
+    const mistakes = vocabData
+      .filter(w => getWordStat(w.id).wrong > 0)
+      .sort((a, b) => getWordStat(b.id).wrong - getWordStat(a.id).wrong);
 
     if (mistakes.length === 0) {
       container.innerHTML = `<p style="text-align:center; color:var(--muted); padding:28px;">目前沒有錯題，繼續保持！🎉</p>`;
